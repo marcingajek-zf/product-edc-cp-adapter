@@ -18,16 +18,16 @@ import java.util.stream.Stream;
 
 import io.cucumber.java.en.Given;
 
-public class AssetStepDefs {
+public class PolicyStepDefs {
 
-  @Given("{connector} has no assets")
-  public void hasNoAssets(Connector connector) throws Exception {
+  @Given("{connector} has no policies")
+  public void hasNoPolicies(Connector connector) throws Exception {
 
     final DataManagementAPI api = connector.getDataManagementAPI();
 
-    Stream<Asset> assets = api.getAllAssets();
-    for (Asset asset : assets.toArray(Asset[]::new)) {
-      api.deleteAsset(asset.getId());
+    Stream<Policy> policies = api.getAllPolicies();
+    for (Policy policy : policies.toArray(Policy[]::new)) {
+      api.deletePolicy(policy.getId());
     }
   }
 
