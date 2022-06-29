@@ -68,10 +68,10 @@ jobs:
 
       - name: Expose k8s service endpoints to github env
         run: |-
-          echo "URL_SOKRATES_DATA_MAGEMENT=http://$(kubectl get svc sokrates-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
+          echo "URL_SOKRATES_DATA_MANAGEMENT=http://$(kubectl get svc sokrates-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
           echo "URL_SOKRATES_IDS=http://$(kubectl get svc sokrates-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 4).nodePort }}')/api/v1/ids" | tee -a $GITHUB_ENV
           echo "URL_SOKRATES_DATA_PLANE=http://$(kubectl get svc sokrates-edc-dataplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/api/public" | tee -a $GITHUB_ENV
-          echo "URL_PLATO_DATA_MAGEMENT=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
+          echo "URL_PLATO_DATA_MANAGEMENT=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
           echo "URL_PLATO_IDS=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 4).nodePort }}')/api/v1/ids" | tee -a $GITHUB_ENV
           echo "URL_PLATO_DATA_PLANE=http://$(kubectl get svc plato-edc-dataplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/api/public" | tee -a $GITHUB_ENV
 
