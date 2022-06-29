@@ -60,7 +60,7 @@ public class DataManagementAPI {
     }
 
     private <T> T get(String pathSegment1, String pathSegment2) throws IOException, ClientProtocolException {
-        return get(pathSegment1 + "/" + pathSegment2);
+        return get(Path.of(pathSegment1, pathSegment2).toString());
     }
 
     private <T> T get(String path) throws IOException, ClientProtocolException {
