@@ -3,7 +3,6 @@ package net.catenax.edc.tests;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -64,7 +63,7 @@ public class DataManagementAPI {
     }
 
     private <T> T get(String path) throws IOException, ClientProtocolException {
-        final String url = Paths.get(dataMgmtUrl, path).toString();
+        final String url = Path.of(dataMgmtUrl, path).toString();
         final HttpHost host = new HttpHost(url);
         final HttpRequest request = RequestBuilder.create("GET")
                 .addHeader("X-Api-Key", Deployment.DATA_MGMT_ACCESS_KEY)
@@ -80,7 +79,7 @@ public class DataManagementAPI {
     }
 
     private void delete(String pathSegment1, String pathSegment2) throws IOException, ClientProtocolException {
-        final String url = Paths.get(dataMgmtUrl, pathSegment1, pathSegment2).toString();
+        final String url = Path.of(dataMgmtUrl, pathSegment1, pathSegment2).toString();
         final HttpHost host = new HttpHost(url);
         final HttpRequest request = RequestBuilder.create("DELETE")
                 .addHeader("X-Api-Key", Deployment.DATA_MGMT_ACCESS_KEY)
