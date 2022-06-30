@@ -14,15 +14,25 @@
 
 package net.catenax.edc.tests;
 
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+
+@RequiredArgsConstructor
 public class Connector {
 
-  private DataManagementAPI dataManagementAPI;
+  @NonNull
+  @Getter
+  private final String name;
 
-  public Connector(String url) {
-    dataManagementAPI = new DataManagementAPI(url);
-  }
+  @Getter
+  @NonNull
+  private final Environment environment;
 
-  public DataManagementAPI getDataManagementAPI() {
-    return dataManagementAPI;
+  @Getter(lazy = true)
+  private final DataManagementAPI dataManagementAPI = loadDataManagementAPI();
+
+  private DataManagementAPI loadDataManagementAPI() {
+    return new DataManagementAPI(environment.getDataManagementUrl());
   }
 }

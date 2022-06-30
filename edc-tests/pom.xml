@@ -24,7 +24,9 @@
 
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>net.catenax.edc.tests</groupId>
     <artifactId>edc-tests</artifactId>
+
     <packaging>jar</packaging>
 
     <dependencies>

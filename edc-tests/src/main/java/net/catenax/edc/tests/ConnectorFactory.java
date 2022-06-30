@@ -1,15 +1,21 @@
 package net.catenax.edc.tests;
 
-import java.util.Objects;
+import lombok.NonNull;
+
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class ConnectorFactory {
-    public Connector fromName(String name) {
-        if (Objects.equals("Plato", name)) {
-            return new Connector(("https://localhost:8181"));
-        }
-        if (Objects.equals("Sokrates", name)) {
-            return new Connector(("https://localhost:9191"));
-        }
-        throw new IllegalArgumentException("Unknown connector: " + name);
-    }
+  private static final Map<String, Connector> CONNECTOR_CACHE = new HashMap<>();
+
+  public static Connector byName(@NonNull final String name) {
+    return CONNECTOR_CACHE.computeIfAbsent(name.toUpperCase(Locale.ROOT), (k) -> createConnector(name));
+  }
+
+  private static Connector createConnector(@NonNull final String name) {
+    final Environment environment = Environment.byName(name);
+
+    return new Connector(name, environment);
+  }
 }

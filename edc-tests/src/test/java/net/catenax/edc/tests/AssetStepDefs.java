@@ -14,9 +14,8 @@
 
 package net.catenax.edc.tests;
 
-import java.util.stream.Stream;
-
 import io.cucumber.java.en.Given;
+import java.util.stream.Stream;
 
 public class AssetStepDefs {
 
@@ -30,5 +29,4 @@ public class AssetStepDefs {
       api.deleteAsset(asset.getId());
     }
   }
-
 }

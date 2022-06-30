@@ -45,7 +45,8 @@ jobs:
       ############################################
       ### Prepare And Install Test Environment ###
       ############################################
-      - name: Install test environment
+      -
+        name: Install test environment
         run: |-
           # Update helm dependencies
           helm dependency update edc-tests/src/main/resources/deployment/helm/all-in-one
@@ -57,29 +58,30 @@ jobs:
             --set sokrates-edc-dataplane.service.type=NodePort \
             --set plato-edc-dataplane.service.type=NodePort \
             --wait-for-jobs --timeout=120s
-
-      - name: Wait for Sokrates and Plato ready
+      -
+        name: Wait for Sokrates and Plato ready
         run: |-
           # Wait for Control-/DataPlanes to become ready
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-dataplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s
-
-      - name: Expose k8s service endpoints to github env
+      -
+        name: Expose k8s service endpoints to github env
         run: |-
-          echo "URL_SOKRATES_DATA_MANAGEMENT=http://$(kubectl get svc sokrates-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
-          echo "URL_SOKRATES_IDS=http://$(kubectl get svc sokrates-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 4).nodePort }}')/api/v1/ids" | tee -a $GITHUB_ENV
-          echo "URL_SOKRATES_DATA_PLANE=http://$(kubectl get svc sokrates-edc-dataplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/api/public" | tee -a $GITHUB_ENV
-          echo "URL_PLATO_DATA_MANAGEMENT=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
-          echo "URL_PLATO_IDS=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 4).nodePort }}')/api/v1/ids" | tee -a $GITHUB_ENV
-          echo "URL_PLATO_DATA_PLANE=http://$(kubectl get svc plato-edc-dataplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/api/public" | tee -a $GITHUB_ENV
+          echo "SOKRATES_DATA_MANAGEMENT_URL=http://$(kubectl get svc sokrates-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
+          echo "SOKRATES_IDS_URL=http://$(kubectl get svc sokrates-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 4).nodePort }}')/api/v1/ids" | tee -a $GITHUB_ENV
+          echo "SOKRATES_DATA_PLANE_URL=http://$(kubectl get svc sokrates-edc-dataplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/api/public" | tee -a $GITHUB_ENV
+          echo "PLATO_DATA_MANAGEMENT_URL=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/data" | tee -a $GITHUB_ENV
+          echo "PLATO_IDS_URL=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 4).nodePort }}')/api/v1/ids" | tee -a $GITHUB_ENV
+          echo "PLATO_DATA_PLANE_URL=http://$(kubectl get svc plato-edc-dataplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/api/public" | tee -a $GITHUB_ENV
 
       ##########################
       ### Run Business Tests ###
       ##########################
-      - name: run tests
-        run: ./mvnw --am --projects edc-tests/business-tests test -Dtest="RunCucumberTest"
+      -
+        name: run tests
+        run: ./mvnw -pl edc-tests test -Dtest="RunCucumberTest"
         # env: {} # Inherited from $GITHUB_ENV
 
       #################
