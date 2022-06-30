@@ -18,8 +18,8 @@ public class Connector {
 
   private DataManagementAPI dataManagementAPI;
 
-  public Connector(String url) {
-    dataManagementAPI = new DataManagementAPI(url);
+  public Connector(String dataManagementUrl, String idsUrl) {
+    dataManagementAPI = new DataManagementAPI(dataManagementUrl);
   }
 
   public DataManagementAPI getDataManagementAPI() {
