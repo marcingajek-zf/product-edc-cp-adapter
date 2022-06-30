@@ -74,8 +74,9 @@ spec:
           {{- if .Values.persistence.enabled }}
           persistentVolumeClaim:
             claimName: {{ include "backend-application.fullname" . }}-pvc
-          {{- else -}}
-          emptyDir: {}
+          {{ else }}
+          emptyDir:
+            {}
           {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:

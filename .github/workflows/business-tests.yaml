@@ -63,9 +63,11 @@ jobs:
             --set sokrates-edc-controlplane.service.type=NodePort \
             --set sokrates-edc-controlplane.env.EDC_API_AUTH_KEY=${SOKRATES_DATA_MANAGEMENT_API_AUTH_KEY} \
             --set sokrates-edc-dataplane.service.type=NodePort \
+            --set sokrates-backend-application.persistence.enabled=true \
             --set plato-edc-controlplane.service.type=NodePort \
             --set plato-edc-controlplane.env.EDC_API_AUTH_KEY=${PLATO_DATA_MANAGEMENT_API_AUTH_KEY} \
             --set plato-edc-dataplane.service.type=NodePort \
+            --set plato-backend-application.persistence.enabled=true \
             --wait-for-jobs --timeout=120s
       -
         name: Wait for Sokrates and Plato ready
@@ -73,8 +75,10 @@ jobs:
           # Wait for Control-/DataPlanes to become ready
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-dataplane --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-backend-application --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-backend-application --timeout=120s
       -
         name: Expose k8s service endpoints to github env
         run: |-
