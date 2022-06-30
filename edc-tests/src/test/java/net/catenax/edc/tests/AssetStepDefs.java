@@ -17,6 +17,7 @@ package net.catenax.edc.tests;
 import java.util.stream.Stream;
 
 import io.cucumber.java.en.Given;
+import net.catenax.edc.tests.data.Asset;
 
 public class AssetStepDefs {
 

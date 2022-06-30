@@ -1,4 +1,4 @@
-package net.catenax.edc.tests;
+package net.catenax.edc.tests.data;
 
 import lombok.Value;
 
