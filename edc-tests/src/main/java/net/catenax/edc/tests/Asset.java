@@ -4,6 +4,6 @@ import lombok.Value;
 
 @Value
 public class Asset {
-  private String Id;
-  private String description;
+  String Id;
+  String description;
 }

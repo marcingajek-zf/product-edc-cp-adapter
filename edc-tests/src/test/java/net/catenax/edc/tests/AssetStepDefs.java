@@ -16,10 +16,11 @@ package net.catenax.edc.tests;
 
 import io.cucumber.java.en.Given;
 import java.util.stream.Stream;
+import net.catenax.edc.tests.data.Asset;
 
 public class AssetStepDefs {
 
-  @Given("{connector} has no assets")
+  @Given("'{connector}' has no assets")
   public void hasNoAssets(Connector connector) throws Exception {
 
     final DataManagementAPI api = connector.getDataManagementAPI();

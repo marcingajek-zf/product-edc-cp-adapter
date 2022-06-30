@@ -21,13 +21,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class Connector {
 
-  @NonNull
-  @Getter
-  private final String name;
+  @NonNull @Getter private final String name;
 
-  @Getter
-  @NonNull
-  private final Environment environment;
+  @Getter @NonNull private final Environment environment;
 
   @Getter(lazy = true)
   private final DataManagementAPI dataManagementAPI = loadDataManagementAPI();

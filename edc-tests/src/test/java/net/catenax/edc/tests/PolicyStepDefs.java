@@ -16,10 +16,11 @@ package net.catenax.edc.tests;
 
 import io.cucumber.java.en.Given;
 import java.util.stream.Stream;
+import net.catenax.edc.tests.data.Policy;
 
 public class PolicyStepDefs {
 
-  @Given("{connector} has no policies")
+  @Given("'{connector}' has no policies")
   public void hasNoPolicies(Connector connector) throws Exception {
 
     final DataManagementAPI api = connector.getDataManagementAPI();
