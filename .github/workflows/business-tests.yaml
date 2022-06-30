@@ -46,6 +46,13 @@ jobs:
       ### Prepare And Install Test Environment ###
       ############################################
       -
+        name: Define random auth keys for test environment
+        run: |-
+          # Create random Sokrates Data-Management-Api password
+          echo SOKRATES_DATA_MANAGEMENT_API_AUTH_KEY="$(tr -dc '[:alnum:]' < /dev/urandom | head -c20)" | tee -a $GITHUB_ENV
+          # Create random Plato Data-Management-Api password
+          echo PLATO_DATA_MANAGEMENT_API_AUTH_KEY="$(tr -dc '[:alnum:]' < /dev/urandom | head -c20)" | tee -a $GITHUB_ENV
+      -
         name: Install test environment
         run: |-
           # Update helm dependencies
@@ -54,8 +61,10 @@ jobs:
           # Install the all-in-one environment
           helm install test-environment edc-tests/src/main/resources/deployment/helm/all-in-one \
             --set sokrates-edc-controlplane.service.type=NodePort \
-            --set plato-edc-controlplane.service.type=NodePort \
+            --set sokrates-edc-controlplane.env.EDC_API_AUTH_KEY=${SOKRATES_DATA_MANAGEMENT_API_AUTH_KEY} \
             --set sokrates-edc-dataplane.service.type=NodePort \
+            --set plato-edc-controlplane.service.type=NodePort \
+            --set plato-edc-controlplane.env.EDC_API_AUTH_KEY=${PLATO_DATA_MANAGEMENT_API_AUTH_KEY} \
             --set plato-edc-dataplane.service.type=NodePort \
             --wait-for-jobs --timeout=120s
       -
