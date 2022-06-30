@@ -1,22 +1,25 @@
 package net.catenax.edc.tests;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import lombok.Value;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 import net.catenax.edc.tests.data.Asset;
 import net.catenax.edc.tests.data.ContractDefinition;
 import net.catenax.edc.tests.data.Policy;
-import org.apache.commons.lang3.SerializationUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 public class DataManagementAPI {
@@ -25,89 +28,109 @@ public class DataManagementAPI {
   private final String POLICY_PATH = "/policies";
   private final String CONTRACT_DEFINITIONS_PATH = "/contractdefinitions";
 
+  private final String apiKey;
   private final String dataMgmtUrl;
   private final HttpClient httpClient;
 
-  public DataManagementAPI(String dataManagementUrl) {
+  public DataManagementAPI(String dataManagementUrl, String apiKey) {
     this.httpClient = HttpClientBuilder.create().build();
     this.dataMgmtUrl = dataManagementUrl + "/data";
+    this.apiKey = apiKey;
   }
 
   public Asset getAsset(String id) throws IOException, ClientProtocolException {
-    final DataManagementApiAsset asset = get(ASSET_PATH, id);
+    final DataManagementApiAsset asset =
+        get(ASSET_PATH, "/" + id, new TypeToken<DataManagementApiAsset>() {});
     return mapAsset(asset);
   }
 
   public Policy getPolicy(String id) throws IOException, ClientProtocolException {
-    final DataManagementApiPolicy policy = get(POLICY_PATH, id);
+    final DataManagementApiPolicy policy =
+        get(POLICY_PATH, "/" + id, new TypeToken<DataManagementApiPolicy>() {});
     return mapPolicy(policy);
   }
 
   public ContractDefinition getContractDefinition(String id)
       throws IOException, ClientProtocolException {
     final DataManagementApiContractDefinition contractDefinition =
-        get(CONTRACT_DEFINITIONS_PATH, id);
+        get(
+            CONTRACT_DEFINITIONS_PATH,
+            "/" + id,
+            new TypeToken<DataManagementApiContractDefinition>() {});
     return mapContractDefinition(contractDefinition);
   }
 
   public Stream<Asset> getAllAssets() throws IOException, ClientProtocolException {
-    final Stream<DataManagementApiAsset> assets = get(ASSET_PATH);
-    return assets.map(this::mapAsset);
+    final List<DataManagementApiAsset> assets =
+        get(ASSET_PATH, new TypeToken<ArrayList<DataManagementApiAsset>>() {});
+    return assets.stream().map(this::mapAsset);
   }
 
   public Stream<Policy> getAllPolicies() throws IOException, ClientProtocolException {
-    final Stream<DataManagementApiPolicy> policies = get(POLICY_PATH);
-    return policies.map(this::mapPolicy);
+    final List<DataManagementApiPolicy> policies =
+        get(POLICY_PATH, new TypeToken<ArrayList<DataManagementApiPolicy>>() {});
+    return policies.stream().map(this::mapPolicy);
   }
 
   public Stream<ContractDefinition> getAllContractDefinitions()
       throws IOException, ClientProtocolException {
-    final Stream<DataManagementApiContractDefinition> contractDefinitions =
-        get(CONTRACT_DEFINITIONS_PATH);
-    return contractDefinitions.map(this::mapContractDefinition);
+    final List<DataManagementApiContractDefinition> contractDefinitions =
+        get(
+            CONTRACT_DEFINITIONS_PATH,
+            new TypeToken<ArrayList<DataManagementApiContractDefinition>>() {});
+    return contractDefinitions.stream().map(this::mapContractDefinition);
   }
 
   public void deleteAsset(String id) throws IOException, ClientProtocolException {
-    delete(ASSET_PATH, id);
+    delete(ASSET_PATH, "/" + id);
   }
 
   public void deletePolicy(String id) throws IOException, ClientProtocolException {
-    delete(POLICY_PATH, id);
+    delete(POLICY_PATH, "/" + id);
   }
 
   public void deleteContractDefinition(String id) throws IOException, ClientProtocolException {
-    delete(CONTRACT_DEFINITIONS_PATH, id);
+    delete(CONTRACT_DEFINITIONS_PATH, "/" + id);
   }
 
-  private <T> T get(String path) throws IOException, ClientProtocolException {
-    return get(path, "");
+  private <T> T get(String path, TypeToken typeToken) throws IOException, ClientProtocolException {
+    return get(path, "", typeToken);
   }
 
-  private <T> T get(String pathSegment1, String pathSegment2)
+  private <T> T get(String pathSegment1, String pathSegment2, TypeToken typeToken)
       throws IOException, ClientProtocolException {
-    final URI url = URI.create(dataMgmtUrl).resolve(pathSegment1).resolve(pathSegment2);
+
+    final String url = String.format("%s%s%s", dataMgmtUrl, pathSegment1, pathSegment2);
     final HttpGet get = new HttpGet(url);
-    get.addHeader("X-Api-Key", Deployment.DATA_MGMT_ACCESS_KEY);
 
-    final HttpResponse response = httpClient.execute(get);
-    if (200 != response.getStatusLine().getStatusCode()) {
-      throw new RuntimeException("Unexpected response: " + response.getStatusLine());
-    }
+    final HttpResponse response = sendRequest(get);
+    final byte[] json = response.getEntity().getContent().readAllBytes();
 
-    final InputStream contentStream = response.getEntity().getContent();
-    return SerializationUtils.deserialize(contentStream);
+    return new Gson().fromJson(new String(json), typeToken.getType());
   }
 
   private void delete(String pathSegment1, String pathSegment2)
       throws IOException, ClientProtocolException {
-    final URI url = URI.create(dataMgmtUrl).resolve(pathSegment1).resolve(pathSegment2);
+    final String url = String.format("%s%s%s", dataMgmtUrl, pathSegment1, pathSegment2);
     final HttpDelete delete = new HttpDelete(url);
-    delete.addHeader("X-Api-Key", Deployment.DATA_MGMT_ACCESS_KEY);
 
-    final HttpResponse response = httpClient.execute(delete);
-    if (200 != response.getStatusLine().getStatusCode()) {
-      throw new RuntimeException("Unexpected response: " + response.getStatusLine());
+    sendRequest(delete);
+  }
+
+  private HttpResponse sendRequest(HttpRequestBase request)
+      throws IOException, ClientProtocolException {
+    request.addHeader("X-Api-Key", apiKey);
+
+    System.out.println(String.format("Send %-6s %s", request.getMethod(), request.getURI()));
+
+    final HttpResponse response = httpClient.execute(request);
+    if (200 > response.getStatusLine().getStatusCode()
+        || response.getStatusLine().getStatusCode() >= 300) {
+      throw new RuntimeException(
+          String.format("Unexpected response: %s", response.getStatusLine()));
     }
+
+    return response;
   }
 
   private Asset mapAsset(DataManagementApiAsset DataManagementApiAsset) {
@@ -129,18 +152,26 @@ public class DataManagementAPI {
     final String id = dataManagementContractDefinition.id;
     final String accessPolicy = dataManagementContractDefinition.accessPolicyId;
     final String contractPolicy = dataManagementContractDefinition.contractPolicyId;
-    final List<String> assetIds =
-        dataManagementContractDefinition.selectorExpression.getCriteria().stream()
-            .filter(c -> c.left.equals(DataManagementApiAsset.ID))
-            .filter(c -> c.op.equals("="))
-            .map(c -> c.getRight())
-            .map(c -> (String) c)
-            .collect(Collectors.toList());
+
+    final List<String> assetIds;
+    if (dataManagementContractDefinition.selectorExpression == null
+        || dataManagementContractDefinition.selectorExpression.getCriteria() == null)
+      assetIds = new ArrayList<>();
+    else
+      assetIds =
+          dataManagementContractDefinition.selectorExpression.getCriteria().stream()
+              .filter(c -> c.left.equals(DataManagementApiAsset.ID))
+              .filter(c -> c.op.equals("="))
+              .map(c -> c.getRight())
+              .map(c -> (String) c)
+              .collect(Collectors.toList());
 
     return new ContractDefinition(id, assetIds, accessPolicy, contractPolicy);
   }
 
-  @Value
+  @Setter
+  @Getter
+  @ToString
   private class DataManagementApiAsset {
     public static final String ID = "asset:prop:id";
     public static final String DESCRIPTION = "asset:prop:description";
@@ -148,12 +179,16 @@ public class DataManagementAPI {
     private Map<String, Object> properties;
   }
 
-  @Value
+  @Getter
+  @Setter
+  @ToString
   private class DataManagementApiPolicy {
     private String uid;
   }
 
-  @Value
+  @Getter
+  @Setter
+  @ToString
   private class DataManagementApiContractDefinition {
     private String id;
     private String accessPolicyId;
@@ -161,13 +196,17 @@ public class DataManagementAPI {
     private DataManagementApiAssetSelectorExpression selectorExpression;
   }
 
-  @Value
+  @Getter
+  @Setter
+  @ToString
   private class DataManagementApiAssetSelectorExpression {
 
     private List<DataManagementApiCriterion> criteria;
   }
 
-  @Value
+  @Getter
+  @Setter
+  @ToString
   private class DataManagementApiCriterion {
     private Object left;
     private String op;

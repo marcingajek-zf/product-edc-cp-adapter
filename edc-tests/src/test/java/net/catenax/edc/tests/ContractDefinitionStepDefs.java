@@ -14,7 +14,7 @@ public class ContractDefinitionStepDefs {
     Stream<ContractDefinition> contractDefinitions = api.getAllContractDefinitions();
     for (ContractDefinition contractDefinition :
         contractDefinitions.toArray(ContractDefinition[]::new)) {
-      api.deleteAsset(contractDefinition.getId());
+      api.deleteContractDefinition(contractDefinition.getId());
     }
   }
 }
