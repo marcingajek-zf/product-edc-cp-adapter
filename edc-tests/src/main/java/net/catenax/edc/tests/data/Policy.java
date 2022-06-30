@@ -1,8 +1,9 @@
 package net.catenax.edc.tests.data;
 
+import lombok.NonNull;
 import lombok.Value;
 
 @Value
 public class Policy {
-  private String id;
+  @NonNull private String id;
 }

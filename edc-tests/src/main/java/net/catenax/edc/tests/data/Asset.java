@@ -1,9 +1,11 @@
 package net.catenax.edc.tests.data;
 
+import lombok.NonNull;
 import lombok.Value;
 
 @Value
 public class Asset {
-  private String Id;
-  private String description;
+  @NonNull private String Id;
+
+  @NonNull private String description;
 }

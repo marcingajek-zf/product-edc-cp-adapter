@@ -1,13 +1,16 @@
 package net.catenax.edc.tests.data;
 
 import java.util.List;
+import lombok.NonNull;
 import lombok.Value;
 
 @Value
 public class ContractDefinition {
 
-  private String id;
+  @NonNull private String id;
+
   private List<String> assetIds;
-  private String contractPolicyId;
-  private String acccessPolicyId;
+
+  @NonNull private String contractPolicyId;
+  @NonNull private String acccessPolicyId;
 }
