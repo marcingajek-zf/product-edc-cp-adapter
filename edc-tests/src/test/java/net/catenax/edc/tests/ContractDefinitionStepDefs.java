@@ -1,6 +1,10 @@
 package net.catenax.edc.tests;
 
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 import net.catenax.edc.tests.data.ContractDefinition;
 
@@ -16,5 +20,29 @@ public class ContractDefinitionStepDefs {
         contractDefinitions.toArray(ContractDefinition[]::new)) {
       api.deleteContractDefinition(contractDefinition.getId());
     }
+  }
+
+  @Given("'{connector}' has the following contract definitions")
+  public void hasPolicies(Connector connector, DataTable table) throws Exception {
+    final DataManagementAPI api = connector.getDataManagementAPI();
+    final List<ContractDefinition> contractDefinitions = parseDataTable(table);
+
+    for (ContractDefinition contractDefinition : contractDefinitions)
+      api.createContractDefinition(contractDefinition);
+  }
+
+  private List<ContractDefinition> parseDataTable(DataTable table) {
+    final List<ContractDefinition> contractDefinitions = new ArrayList<>();
+
+    for (Map<String, String> map : table.asMaps()) {
+      String id = map.get("id");
+      String accessPolicyId = map.get("access policy");
+      String contractPolicyId = map.get("contract policy");
+      String assetid = map.get("asset");
+      contractDefinitions.add(
+          new ContractDefinition(id, contractPolicyId, accessPolicyId, List.of(assetid)));
+    }
+
+    return contractDefinitions;
   }
 }

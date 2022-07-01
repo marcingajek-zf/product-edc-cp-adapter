@@ -19,19 +19,19 @@ Feature: Contract Offers
     Given 'Plato' has no assets
 
   Scenario: Catalog Request
-    Given 'Plato' has the following asset/s
+    Given 'Plato' has the following assets
       | id      | description   |
       | asset-1 | Example Asset |
       | asset-2 | Example Asset |
-    And 'Plato' has the following policy/s
-      | id       |
-      | policy-1 |
-    And 'Plato' has the following contract definition/s
+    And 'Plato' has the following policies
+      | id       | action |
+      | policy-1 | USE    |
+    And 'Plato' has the following contract definitions
       | id                    | access policy | contract policy | asset   |
       | contract-definition-1 | policy-1      | policy-1        | asset-1 |
       | contract-definition-2 | policy-1      | policy-1        | asset-2 |
     When 'Sokrates' requests the catalog from 'Plato'
     Then the catalog contains the following offers
-      | source definition | source contract policy | asset   |
-      | contract-offer-1  | policy-1               | asset-1 |
-      | contract-offer-2  | policy-1               | asset-2 |
+      | source definition     | asset   |
+      | contract-definition-1 | asset-1 |
+      | contract-definition-2 | asset-2 |
