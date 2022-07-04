@@ -98,19 +98,16 @@ jobs:
             --wait-for-jobs --timeout=120s
 
           helm list
-          kubectl get all
       -
         name: Wait for Sokrates and Plato to become ready
         run: |-
-          whereis kubectl
-          kubectl get all -owide
           # Wait for Control-/DataPlanes to become ready
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-backend-application --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-backend-application --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-dataplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=120s
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=300s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=300s
 
       ##############################################
       ### Run Business Tests inside kind cluster ###
