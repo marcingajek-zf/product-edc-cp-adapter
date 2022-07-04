@@ -9,8 +9,8 @@ public class ContractDefinition {
 
   @NonNull private String id;
 
-  private List<String> assetIds;
-
   @NonNull private String contractPolicyId;
   @NonNull private String acccessPolicyId;
+
+  private List<String> assetIds;
 }
