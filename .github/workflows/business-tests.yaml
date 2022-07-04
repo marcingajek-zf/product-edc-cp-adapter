@@ -96,6 +96,9 @@ jobs:
             --set plato-edc-dataplane.service.type=ClusterIP \
             --set plato-backend-application.persistence.enabled=false \
             --wait-for-jobs --timeout=120s
+
+          helm list
+          kubectl get all
       -
         name: Wait for Sokrates and Plato to become ready
         run: |-
