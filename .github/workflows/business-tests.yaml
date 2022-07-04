@@ -47,7 +47,6 @@ jobs:
           ---
           kind: Cluster
           apiVersion: kind.x-k8s.io/v1alpha4
-          name: ${{ env.GITHUB_SHA }}
           nodes:
           - role: control-plane
             extraMounts:
@@ -60,7 +59,6 @@ jobs:
         name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.3.0
         with:
-          cluster_name: ${{ env.GITHUB_SHA }}
           config: kind.config.yaml
 
       ############################################
@@ -69,6 +67,7 @@ jobs:
       -
         name: Define test environment variables
         run: |-
+          kind get clusters
           # Create random Sokrates Data-Management-Api password
           echo SOKRATES_DATA_MANAGEMENT_API_AUTH_KEY="$(tr -dc '[:alnum:]' < /dev/urandom | head -c20)" | tee -a ${GITHUB_ENV}
           # Create random Plato Data-Management-Api password
@@ -191,4 +190,4 @@ jobs:
         name: Destroy the kind cluster
         if: always()
         run: >-
-          kind delete clusters ${{ env.GITHUB_SHA }}
+          kind delete clusters
