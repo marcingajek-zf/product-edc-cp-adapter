@@ -189,4 +189,4 @@ jobs:
         name: Destroy the kind cluster
         if: always()
         run: >-
-          kind delete clusters
+          kind delete clusters $(kind get clusters)
