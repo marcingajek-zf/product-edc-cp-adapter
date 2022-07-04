@@ -45,7 +45,7 @@
         <!-- plugins -->
         <org.apache.maven.plugins.maven.dependency.plugin.version>3.3.0</org.apache.maven.plugins.maven.dependency.plugin.version>
         <org.apache.maven.plugins.maven.jar.plugin.version>3.2.2</org.apache.maven.plugins.maven.jar.plugin.version>
-        <com.diffplug.spotless.maven.plugin.version>2.22.8</com.diffplug.spotless.maven.plugin.version>
+        <com.diffplug.spotless.maven.plugin.version>2.23.0</com.diffplug.spotless.maven.plugin.version>
         <org.codehaus.mojo.exec.maven.plugin.version>3.0.0</org.codehaus.mojo.exec.maven.plugin.version>
         <org.apache.maven.plugins.javadoc.version>3.4.0</org.apache.maven.plugins.javadoc.version>
         <org.codehaus.mojo.license.maven.plugin>2.0.0</org.codehaus.mojo.license.maven.plugin>
@@ -74,7 +74,7 @@
         <org.projectlombok.lombok.version>1.18.24</org.projectlombok.lombok.version>
         <org.bouncycastle.bcpkix-jdk15on.version>1.70</org.bouncycastle.bcpkix-jdk15on.version>
         <com.squareup.okhttp3.okhttp.version>4.9.3</com.squareup.okhttp3.okhttp.version>
-        <org.testcontainers.version>1.17.2</org.testcontainers.version>
+        <org.testcontainers.version>1.17.3</org.testcontainers.version>
         <org.slf4j.version>2.0.0-alpha1</org.slf4j.version>
         <ch.qos.logback.logback-core.version>1.2.11</ch.qos.logback.logback-core.version>
     </properties>
