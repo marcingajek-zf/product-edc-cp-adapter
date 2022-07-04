@@ -41,7 +41,7 @@ public class DataManagementAPI {
 
   public DataManagementAPI(String dataManagementUrl, String apiKey) {
     this.httpClient = HttpClientBuilder.create().build();
-    this.dataMgmtUrl = dataManagementUrl + "/data";
+    this.dataMgmtUrl = dataManagementUrl;
     this.apiKey = apiKey;
   }
 

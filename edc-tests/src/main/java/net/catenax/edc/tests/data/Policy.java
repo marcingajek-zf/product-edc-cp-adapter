@@ -6,6 +6,6 @@ import lombok.Value;
 
 @Value
 public class Policy {
-  @NonNull private String id;
-  @NonNull private List<Permission> Permission;
+  @NonNull String id;
+  @NonNull List<Permission> Permission;
 }

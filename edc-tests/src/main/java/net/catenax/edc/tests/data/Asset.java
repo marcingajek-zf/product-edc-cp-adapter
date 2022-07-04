@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 public class Asset {
-  @NonNull private String Id;
+  @NonNull String Id;
 
-  @NonNull private String description;
+  @NonNull String description;
 }

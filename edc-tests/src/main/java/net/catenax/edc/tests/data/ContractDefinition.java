@@ -7,10 +7,10 @@ import lombok.Value;
 @Value
 public class ContractDefinition {
 
-  @NonNull private String id;
+  @NonNull String id;
 
-  @NonNull private String contractPolicyId;
-  @NonNull private String acccessPolicyId;
+  @NonNull String contractPolicyId;
+  @NonNull String acccessPolicyId;
 
-  private List<String> assetIds;
+  List<String> assetIds;
 }

@@ -5,6 +5,6 @@ import lombok.Value;
 
 @Value
 public class Permission {
-  @NonNull private String action;
-  private String target;
+  @NonNull String action;
+  String target;
 }

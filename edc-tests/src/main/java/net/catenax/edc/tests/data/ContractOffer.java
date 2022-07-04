@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 public class ContractOffer {
-  @NonNull private String id;
-  private Policy policy;
-  private String assetId;
+  @NonNull String id;
+  Policy policy;
+  String assetId;
 }
