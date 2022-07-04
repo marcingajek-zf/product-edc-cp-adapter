@@ -37,10 +37,27 @@ jobs:
         with:
           version: v3.8.1
       -
+        name: Create kind.config.yaml
+        run: |-
+          export MAVEN_REPOSITORY=$(./mvnw help:evaluate -Dexpression=settings.localRepository -q -DforceStdout)
+          cat << EOF > kind.config.yaml
+          ---
+          kind: Cluster
+          apiVersion: kind.x-k8s.io/v1alpha4
+          nodes:
+          - role: control-plane
+            extraMounts:
+              - hostPath: ${PWD}
+                containerPath: /srv/product-edc
+              - hostPath: ${MAVEN_REPOSITORY}
+                containerPath: /srv/m2-repository
+          EOF
+      -
         name: Create k8s Kind Cluster
         uses: helm/kind-action@v1.3.0
         with:
           cluster_name: ${{ env.GITHUB_SHA }}
+          config: kind.config.yaml
 
       ############################################
       ### Prepare And Install Test Environment ###
@@ -63,22 +80,22 @@ jobs:
             --set sokrates-edc-controlplane.service.type=NodePort \
             --set sokrates-edc-controlplane.env.EDC_API_AUTH_KEY=${SOKRATES_DATA_MANAGEMENT_API_AUTH_KEY} \
             --set sokrates-edc-dataplane.service.type=NodePort \
-            --set sokrates-backend-application.persistence.enabled=true \
+            --set sokrates-backend-application.persistence.enabled=false \
             --set plato-edc-controlplane.service.type=NodePort \
             --set plato-edc-controlplane.env.EDC_API_AUTH_KEY=${PLATO_DATA_MANAGEMENT_API_AUTH_KEY} \
             --set plato-edc-dataplane.service.type=NodePort \
-            --set plato-backend-application.persistence.enabled=true \
+            --set plato-backend-application.persistence.enabled=false \
             --wait-for-jobs --timeout=120s
       -
         name: Wait for Sokrates and Plato ready
         run: |-
           # Wait for Control-/DataPlanes to become ready
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=120s
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-dataplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-backend-application --timeout=120s
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=120s
-          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-backend-application --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-dataplane --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=120s
       -
         name: Expose k8s service endpoints to github env
         run: |-
@@ -89,13 +106,13 @@ jobs:
           echo "PLATO_IDS_URL=http://$(kubectl get svc plato-edc-controlplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 4).nodePort }}')/api/v1/ids" | tee -a $GITHUB_ENV
           echo "PLATO_DATA_PLANE_URL=http://$(kubectl get svc plato-edc-dataplane -o go-template='{{ .spec.clusterIP }}{{":"}}{{ (index .spec.ports 2).nodePort }}')/api/public" | tee -a $GITHUB_ENV
 
-      ##########################
-      ### Run Business Tests ###
-      ##########################
+      ##############################################
+      ### Run Business Tests inside kind cluster ###
+      ##############################################
       -
-        name: run tests
-        run: ./mvnw -pl edc-tests test -Dtest="RunCucumberTest"
-        # env: {} # Inherited from $GITHUB_ENV
+        name: Run Business Tests
+        run: |-
+          kubectl run -i --image=openjdk:11-jdk-slim --rm edc-tests --restart=Never echo $(cat $GITHUB_ENV | grep "SOKRATES\|PLATO" | xargs -I {} echo --env={}) --overrides='{"apiVersion":"v1","kind":"Pod","spec":{"containers":[{"args":["-c","env && cd /product-edc && ./mvnw -pl edc-tests test -Dtest=RunCucumberTest"],"command":["/bin/sh"],"image":"openjdk:11-jdk-slim","name":"edc-tests","volumeMounts":[{"mountPath":"/product-edc","name":"product-edc"},{"mountPath":"/root/.m2/repository","name":"m2-repository"}]}],"dnsPolicy":"ClusterFirst","restartPolicy":"Never","volumes":[{"hostPath":{"path":"/srv/product-edc"},"name":"product-edc"},{"hostPath":{"path":"/srv/m2-repository"},"name":"m2-repository"}]}}'
 
       #################
       ### Tear Down ###
