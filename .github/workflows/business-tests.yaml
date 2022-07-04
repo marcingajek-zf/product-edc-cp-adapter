@@ -101,6 +101,8 @@ jobs:
       -
         name: Wait for Sokrates and Plato to become ready
         run: |-
+          whereis kubectl
+          kubectl get all -owide
           # Wait for Control-/DataPlanes to become ready
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-backend-application --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-backend-application --timeout=120s
