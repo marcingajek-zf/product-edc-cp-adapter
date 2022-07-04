@@ -67,11 +67,10 @@ jobs:
       -
         name: Define test environment variables
         run: |-
-          kind get clusters
           # Create random Sokrates Data-Management-Api password
-          echo SOKRATES_DATA_MANAGEMENT_API_AUTH_KEY="$(tr -dc '[:alnum:]' < /dev/urandom | head -c20)" | tee -a ${GITHUB_ENV}
+          echo SOKRATES_DATA_MANAGEMENT_API_AUTH_KEY="sokrates" | tee -a ${GITHUB_ENV}
           # Create random Plato Data-Management-Api password
-          echo PLATO_DATA_MANAGEMENT_API_AUTH_KEY="$(tr -dc '[:alnum:]' < /dev/urandom | head -c20)" | tee -a ${GITHUB_ENV}
+          echo PLATO_DATA_MANAGEMENT_API_AUTH_KEY="plato" | tee -a ${GITHUB_ENV}
 
           # Define endpoints
           echo "SOKRATES_DATA_MANAGEMENT_URL=http://sokrates-edc-controlplane:8181/data" | tee -a ${GITHUB_ENV}
