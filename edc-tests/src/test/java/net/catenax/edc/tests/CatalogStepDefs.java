@@ -20,7 +20,7 @@ public class CatalogStepDefs {
       throws ClientProtocolException, IOException {
 
     final DataManagementAPI dataManagementAPI = sender.getDataManagementAPI();
-    final String receiverIdsUrl = receiver.getEnvironment().getIdsUrl() + "/api/v1/ids/data";
+    final String receiverIdsUrl = receiver.getEnvironment().getIdsUrl();
 
     lastRequestedOffers =
         dataManagementAPI.requestCatalogFrom(receiverIdsUrl).collect(Collectors.toList());
