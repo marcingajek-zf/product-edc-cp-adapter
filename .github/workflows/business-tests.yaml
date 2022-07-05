@@ -111,6 +111,8 @@ jobs:
           sleep 20
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=600s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=600s
+          sleep 5
+          kubectl get pods
 
       ##############################################
       ### Run Business Tests inside kind cluster ###
