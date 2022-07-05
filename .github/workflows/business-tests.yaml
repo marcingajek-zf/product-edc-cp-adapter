@@ -106,6 +106,9 @@ jobs:
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-backend-application --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-dataplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-vault --timeout=120s
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-vault --timeout=120s
+          sleep 20
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=600s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=600s
 
