@@ -116,6 +116,8 @@ jobs:
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s || ( kubectl logs -l app.kubernetes.io/name=plato-edc-dataplane && exit 1 )
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-vault --timeout=120s || ( kubectl logs -l app.kubernetes.io/name=sokrates-vault && exit 1 )
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-vault --timeout=120s || ( kubectl logs -l app.kubernetes.io/name=plato-vault && exit 1 )
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-postgresql --timeout=120s || ( kubectl logs -l app.kubernetes.io/name=sokrates-postgresql && exit 1 )
+          kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-postgresql --timeout=120s || ( kubectl logs -l app.kubernetes.io/name=plato-postgresql && exit 1 )
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=600s || ( kubectl logs -l app.kubernetes.io/name=sokrates-edc-controlplane && exit 1 )
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=600s || ( kubectl logs -l app.kubernetes.io/name=plato-edc-controlplane && exit 1 )
 
