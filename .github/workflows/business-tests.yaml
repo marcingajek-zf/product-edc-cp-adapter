@@ -102,6 +102,8 @@ jobs:
         name: Wait for Sokrates and Plato to become ready
         run: |-
           # Wait for Control-/DataPlanes to become ready
+          kubectl delete pvc --all
+          kubectl delete pv --all
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-backend-application --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-backend-application --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-postgresql --timeout=120s
@@ -110,7 +112,9 @@ jobs:
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-vault --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-dataplane --timeout=120s
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-dataplane --timeout=120s
+          kubectl delete pod -l app.kubernetes.io/name=sokrates-edc-controlplane
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=sokrates-edc-controlplane --timeout=600s
+          kubectl delete pod -l app.kubernetes.io/name=plato-edc-controlplane
           kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=plato-edc-controlplane --timeout=600s
 
       ##############################################
