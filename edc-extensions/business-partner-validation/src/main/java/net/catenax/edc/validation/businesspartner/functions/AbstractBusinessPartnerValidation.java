@@ -79,14 +79,19 @@ public abstract class AbstractBusinessPartnerValidation {
     }
 
     final ParticipantAgent participantAgent = policyContext.getParticipantAgent();
-    final Map<String, String> claims = participantAgent.getClaims();
+    final Map<String, Object> claims = participantAgent.getClaims();
 
     if (!claims.containsKey(REFERRING_CONNECTOR_CLAIM)) {
       return false;
     }
 
-    String referringConnectorClaim = claims.get(REFERRING_CONNECTOR_CLAIM);
-    if (referringConnectorClaim == null || referringConnectorClaim.isEmpty()) {
+    Object referringConnectorClaimObject = claims.get(REFERRING_CONNECTOR_CLAIM);
+    if (!(referringConnectorClaimObject instanceof String)) {
+      return false;
+    }
+
+    String referringConnectorClaim = (String) referringConnectorClaimObject;
+    if (referringConnectorClaim.isEmpty()) {
       return false;
     }
 
@@ -103,13 +108,13 @@ public abstract class AbstractBusinessPartnerValidation {
   }
 
   /**
-   * @param referingConnectorClaim of the participant
-   * @param businessPartnerNumber object
-   * @return true if object is an iterable and constains a string that is successfully evaluated
+   * @param referringConnectorClaim of the participant
+   * @param businessPartnerNumbers object
+   * @return true if object is an iterable and contains a string that is successfully evaluated
    *     against the claim
    */
   private boolean containsBusinessPartnerNumber(
-      String referingConnectorClaim, Object businessPartnerNumbers, PolicyContext policyContext) {
+      String referringConnectorClaim, Object businessPartnerNumbers, PolicyContext policyContext) {
     if (businessPartnerNumbers == null) {
       final String message =
           String.format(FAIL_EVALUATION_BECAUSE_RIGHT_VALUE_NOT_ITERABLE, "null");
@@ -144,7 +149,7 @@ public abstract class AbstractBusinessPartnerValidation {
         policyContext.reportProblem(message);
         continue;
       }
-      if (isCorrectBusinessPartner(referingConnectorClaim, (String) businessPartnerNumber)) {
+      if (isCorrectBusinessPartner(referringConnectorClaim, (String) businessPartnerNumber)) {
         return true; // iterable does contain at least one matching value
       }
     }
