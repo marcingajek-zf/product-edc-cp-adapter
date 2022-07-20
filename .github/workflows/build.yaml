@@ -92,13 +92,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |-
-          #-Dsonar.projectKey=${GITHUB_REPOSITORY_OWNER}_product-edc
-          #-Dsonar.organization=${GITHUB_REPOSITORY_OWNER}
-
           ./mvnw -s settings.xml -B clean verify sonar:sonar \
-            -Pfailsafe,coverage \
-            -Dsonar.coverage.jacoco.xmlReportPaths=edc-tests/target/site/jacoco-aggregate/jacoco.xml \
+            -Pcoverage,failsafe \
+            -Dsonar.projectKey=${GITHUB_REPOSITORY_OWNER}_product-edc \
+            -Dsonar.organization=${GITHUB_REPOSITORY_OWNER} \
             -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.coverage.jacoco.xmlReportPaths=${GITHUB_WORKSPACE}/edc-tests/target/site/jacoco-aggregate/jacoco.xml \
             -Dsonar.verbose=true
 
   #################################
