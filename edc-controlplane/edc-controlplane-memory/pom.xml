@@ -16,7 +16,7 @@
     <parent>
         <groupId>net.catenax.edc</groupId>
         <artifactId>edc-controlplane</artifactId>
-        <version>0.0.4</version>
+        <version>0.0.5-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -83,40 +83,54 @@
             <artifactId>edc-controlplane-base</artifactId>
         </dependency>
 
-        <!-- Vault -->
+        <!-- CX Extensions -->
         <dependency>
-            <groupId>org.eclipse.dataspaceconnector</groupId>
-            <artifactId>azure-vault</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.azure</groupId>
-                    <artifactId>azure-security-keyvault-secrets</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>com.azure</groupId>
-                    <artifactId>azure-identity</artifactId>
-                </exclusion>
-            </exclusions>
+            <groupId>net.catenax.edc.extensions</groupId>
+            <artifactId>control-plane-adapter</artifactId>
+            <version>0.0.5-SNAPSHOT</version>
         </dependency>
+
+        <!-- Vault -->
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.dataspaceconnector</groupId>-->
+<!--            <artifactId>azure-vault</artifactId>-->
+<!--            <exclusions>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.azure</groupId>-->
+<!--                    <artifactId>azure-security-keyvault-secrets</artifactId>-->
+<!--                </exclusion>-->
+<!--                <exclusion>-->
+<!--                    <groupId>com.azure</groupId>-->
+<!--                    <artifactId>azure-identity</artifactId>-->
+<!--                </exclusion>-->
+<!--            </exclusions>-->
+<!--        </dependency>-->
 
         <!-- IAM -->
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.dataspaceconnector</groupId>-->
+<!--            <artifactId>oauth2-core</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>org.eclipse.dataspaceconnector</groupId>-->
+<!--            <artifactId>iam-daps</artifactId>-->
+<!--        </dependency>-->
+
+        <!-- Supportive -->
         <dependency>
             <groupId>org.eclipse.dataspaceconnector</groupId>
-            <artifactId>oauth2-core</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.dataspaceconnector</groupId>
-            <artifactId>iam-daps</artifactId>
+            <artifactId>transaction-local</artifactId>
         </dependency>
 
-        <!-- Other -->
+
+        <!-- Required to mock daps -->
         <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-identity</artifactId>
+            <groupId>org.eclipse.dataspaceconnector</groupId>
+            <artifactId>iam-mock</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.azure</groupId>
-            <artifactId>azure-security-keyvault-secrets</artifactId>
+            <groupId>org.eclipse.dataspaceconnector</groupId>
+            <artifactId>filesystem-vault</artifactId>
         </dependency>
     </dependencies>
 
