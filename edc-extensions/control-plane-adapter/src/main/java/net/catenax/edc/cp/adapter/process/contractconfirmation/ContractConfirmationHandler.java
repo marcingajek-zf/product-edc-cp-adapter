@@ -1,6 +1,6 @@
 package net.catenax.edc.cp.adapter.process.contractconfirmation;
 
-import java.util.Objects;
+import static java.util.Objects.isNull;
 
 import lombok.RequiredArgsConstructor;
 import net.catenax.edc.cp.adapter.exception.DataReferenceAccessException;
@@ -21,87 +21,92 @@ import org.eclipse.dataspaceconnector.spi.types.domain.transfer.TransferType;
 
 @RequiredArgsConstructor
 public class ContractConfirmationHandler implements Listener, ContractNegotiationListener {
-    private final Monitor monitor;
-    private final MessageService messageService;
-    private final DataStore dataStore;
-    private final ContractNegotiationService contractNegotiationService;
-    private final TransferProcessService transferProcessService;
+  private final Monitor monitor;
+  private final MessageService messageService;
+  private final DataStore dataStore;
+  private final ContractNegotiationService contractNegotiationService;
+  private final TransferProcessService transferProcessService;
 
-    @Override
-    public void process(Message message) {
-        monitor.info("ContractConfirmationHandler: received message /" + message.getTraceId());
-        String contractNegotiationId = message.getPayload().getContractNegotiationId();
+  @Override
+  public void process(Message message) {
+    monitor.info(
+        String.format("[%s] ContractConfirmationHandler: received message.", message.getTraceId()));
+    String contractNegotiationId = message.getPayload().getContractNegotiationId();
 
-        if (isContractConfirmed(contractNegotiationId)) {
-            initiateDataTransfer(message); // TODO  - contractAgreementID may be missing
-            return;
-        }
-
-        String confirmedContractAgreementId = dataStore.getConfirmedContract(contractNegotiationId);
-        if (Objects.isNull(confirmedContractAgreementId)) {
-            dataStore.storeMessage(message);
-            return;
-        }
-
-        message.getPayload().setContractAgreementId(confirmedContractAgreementId);
-        initiateDataTransfer(message);
-        dataStore.removeConfirmedContract(contractNegotiationId);
+    if (isContractConfirmed(contractNegotiationId)) {
+      initiateDataTransfer(message); // TODO  - contractAgreementID may be missing
+      return;
     }
 
-    @Override
-    public void preConfirmed(ContractNegotiation negotiation) {
-        monitor.info("ContractConfirmationHandler: received 'ContractNegotiation' event");
-        String contractNegotiationId = negotiation.getId();
-        String contractAgreementId = negotiation.getContractAgreement().getId();
-        Message message = dataStore.getMessage(contractNegotiationId);
-        if (Objects.isNull(message)) {
-            dataStore.storeConfirmedContract(contractNegotiationId, contractAgreementId);
-            return;
-        }
-        message.getPayload().setContractAgreementId(contractAgreementId);
-        initiateDataTransfer(message);
-        dataStore.removeMessage(contractNegotiationId);
+    String confirmedContractAgreementId = dataStore.getConfirmedContract(contractNegotiationId);
+    if (isNull(confirmedContractAgreementId)) {
+      dataStore.storeMessage(message);
+      return;
     }
 
-    private boolean isContractConfirmed(String contractNegotiationId) {
-        return contractNegotiationService
-                .getState(contractNegotiationId)
-                .equals(ContractNegotiationStates.CONFIRMED.name());
+    message.getPayload().setContractAgreementId(confirmedContractAgreementId);
+    initiateDataTransfer(message);
+    dataStore.removeConfirmedContract(contractNegotiationId);
+  }
+
+  @Override
+  public void preConfirmed(ContractNegotiation negotiation) {
+    monitor.info("ContractConfirmationHandler: received 'ContractNegotiation' event");
+    String contractNegotiationId = negotiation.getId();
+    String contractAgreementId = negotiation.getContractAgreement().getId();
+    Message message = dataStore.getMessage(contractNegotiationId);
+    if (isNull(message)) {
+      dataStore.storeConfirmedContract(contractNegotiationId, contractAgreementId);
+      return;
     }
+    message.getPayload().setContractAgreementId(contractAgreementId);
+    initiateDataTransfer(message);
+    dataStore.removeMessage(contractNegotiationId);
+  }
 
-    private void initiateDataTransfer(Message message) {
-        sendInitiationRequest(message);
-        message.getPayload().setContractConfirmed(true);
-        messageService.send(Channel.DATA_REFERENCE, message);
+  private boolean isContractConfirmed(String contractNegotiationId) {
+    return contractNegotiationService
+        .getState(contractNegotiationId)
+        .equals(ContractNegotiationStates.CONFIRMED.name());
+  }
+
+  private void initiateDataTransfer(Message message) {
+    sendInitiationRequest(message);
+    message.getPayload().setContractConfirmed(true);
+    messageService.send(Channel.DATA_REFERENCE, message);
+  }
+
+  private void sendInitiationRequest(Message message) {
+    monitor.info(
+        String.format(
+            "[%s] ContractConfirmationHandler: transfer init - start.", message.getTraceId()));
+    DataAddress dataDestination = DataAddress.Builder.newInstance().type("HttpProxy").build();
+
+    TransferType transferType =
+        TransferType.Builder.transferType()
+            .contentType("application/octet-stream")
+            .isFinite(true)
+            .build();
+
+    DataRequest dataRequest =
+        DataRequest.Builder.newInstance()
+            .id(message.getTraceId())
+            .assetId(message.getPayload().getAssetId())
+            .contractId(message.getPayload().getContractAgreementId())
+            .connectorId("provider")
+            .connectorAddress(message.getPayload().getProvider())
+            .protocol("ids-multipart")
+            .dataDestination(dataDestination)
+            .managedResources(false)
+            .transferType(transferType)
+            .build();
+
+    ServiceResult<String> result = transferProcessService.initiateTransfer(dataRequest);
+    monitor.info(
+        String.format(
+            "[%s] ContractConfirmationHandler: transfer init - end", message.getTraceId()));
+    if (result.failed()) {
+      throw new DataReferenceAccessException(message.getPayload().getAssetId());
     }
-
-    private void sendInitiationRequest(Message message) {
-        monitor.info("ContractConfirmationHandler: transfer initiation - start /" + message.getTraceId());
-        DataAddress dataDestination = DataAddress.Builder.newInstance().type("HttpProxy").build();
-
-        TransferType transferType =
-                TransferType.Builder.transferType()
-                        .contentType("application/octet-stream")
-                        .isFinite(true)
-                        .build();
-
-        DataRequest dataRequest =
-                DataRequest.Builder.newInstance()
-                        .id(message.getTraceId())
-                        .assetId(message.getPayload().getAssetId())
-                        .contractId(message.getPayload().getContractAgreementId())
-                        .connectorId("provider")
-                        .connectorAddress(message.getPayload().getProvider())
-                        .protocol("ids-multipart")
-                        .dataDestination(dataDestination)
-                        .managedResources(false)
-                        .transferType(transferType)
-                        .build();
-
-        ServiceResult<String> result = transferProcessService.initiateTransfer(dataRequest);
-        monitor.info("ContractConfirmationHandler: transfer initiation - end / " + message.getTraceId());
-        if (result.failed()) {
-            throw new DataReferenceAccessException(message.getPayload().getAssetId());
-        }
-    }
+  }
 }
