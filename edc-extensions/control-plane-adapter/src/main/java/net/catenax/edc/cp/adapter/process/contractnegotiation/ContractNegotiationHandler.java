@@ -3,9 +3,9 @@ package net.catenax.edc.cp.adapter.process.contractnegotiation;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
-
 import lombok.RequiredArgsConstructor;
 import net.catenax.edc.cp.adapter.dto.ProcessData;
+import net.catenax.edc.cp.adapter.exception.ContractOfferNotAvailable;
 import net.catenax.edc.cp.adapter.exception.ResourceNotFoundException;
 import net.catenax.edc.cp.adapter.messaging.Channel;
 import net.catenax.edc.cp.adapter.messaging.Listener;
@@ -21,52 +21,59 @@ import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractOf
 
 @RequiredArgsConstructor
 public class ContractNegotiationHandler implements Listener {
-    private final Monitor monitor;
-    private final MessageService messageService;
-    private final ContractNegotiationService contractNegotiationService;
-    private final CatalogService catalogService;
+  private final Monitor monitor;
+  private final MessageService messageService;
+  private final ContractNegotiationService contractNegotiationService;
+  private final CatalogService catalogService;
 
-    @Override
-    public void process(Message message) {
-        monitor.debug("RequestHandler: input request: " + message.getPayload());
-        ProcessData processData = message.getPayload();
-        ContractOffer contractOffer = findContractOffer(processData.getAssetId(), processData.getProvider());
+  @Override
+  public void process(Message message) {
+    monitor.debug("RequestHandler: input request: " + message.getPayload());
+    ProcessData processData = message.getPayload();
+    ContractOffer contractOffer =
+        findContractOffer(processData.getAssetId(), processData.getProvider());
 
-        String contractNegotiationId = initializeContractNegotiation(contractOffer, message.getPayload().getProvider(), message.getTraceId());
-        message.getPayload().setContractNegotiationId(contractNegotiationId);
+    String contractNegotiationId =
+        initializeContractNegotiation(
+            contractOffer, message.getPayload().getProvider(), message.getTraceId());
+    message.getPayload().setContractNegotiationId(contractNegotiationId);
 
-        messageService.send(Channel.CONTRACT_CONFIRMATION, message);
+    messageService.send(Channel.CONTRACT_CONFIRMATION, message);
+  }
+
+  private ContractOffer findContractOffer(String assetId, String providerUrl) {
+    Catalog catalog;
+    try {
+      catalog = catalogService.getByProviderUrl(providerUrl).get();
+    } catch (InterruptedException | ExecutionException e) {
+      throw new ContractOfferNotAvailable(e);
     }
 
-    private ContractOffer findContractOffer(String assetId, String providerUrl) {
-        Catalog catalog = null;
-        try {
-            catalog = catalogService.getByProviderUrl(providerUrl).get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e); // TODO sth else?
-        }
+    return Optional.ofNullable(catalog.getContractOffers()).orElse(Collections.emptyList()).stream()
+        .filter(it -> it.getAsset().getId().equals(assetId))
+        .findFirst()
+        .orElseThrow(
+            () ->
+                new ResourceNotFoundException("Could not find Contract Offer for given Asset Id"));
+  }
 
-        return Optional.ofNullable(catalog.getContractOffers()).orElse(Collections.emptyList()).stream()
-                .filter(it -> it.getAsset().getId().equals(assetId))
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find Contract Offer for given Asset Id"));
-    }
+  private String initializeContractNegotiation(
+      ContractOffer contractOffer, String providerUrl, String traceId) {
+    monitor.info(String.format("[%s] RequestHandler: initiateNegotiation - start", traceId));
+    ContractOfferRequest contractOfferRequest =
+        ContractOfferRequest.Builder.newInstance()
+            .connectorAddress(providerUrl)
+            .contractOffer(contractOffer)
+            .type(ContractOfferRequest.Type.INITIAL)
+            .connectorId("provider")
+            .protocol("ids-multipart")
+            .correlationId(traceId)
+            .build();
 
-    private String initializeContractNegotiation(ContractOffer contractOffer, String providerUrl, String traceId) {
-        monitor.info("RequestHandler: initiateNegotiation - start");
-        ContractOfferRequest contractOfferRequest =
-                ContractOfferRequest.Builder.newInstance()
-                        .connectorAddress(providerUrl)
-                        .contractOffer(contractOffer)
-                        .type(ContractOfferRequest.Type.INITIAL)
-                        .connectorId("provider")
-                        .protocol("ids-multipart")
-                        .correlationId(traceId)
-                        .build();
-
-        ContractNegotiation contractNegotiation = contractNegotiationService.initiateNegotiation(contractOfferRequest);
-        monitor.info("RequestHandler: initiateNegotiation - end");
-        return Optional.ofNullable(contractNegotiation.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Could not find Contract NegotiationId"));
-    }
+    ContractNegotiation contractNegotiation =
+        contractNegotiationService.initiateNegotiation(contractOfferRequest);
+    monitor.info(String.format("[%s] RequestHandler: initiateNegotiation - end", traceId));
+    return Optional.ofNullable(contractNegotiation.getId())
+        .orElseThrow(() -> new ResourceNotFoundException("Could not find Contract NegotiationId"));
+  }
 }
