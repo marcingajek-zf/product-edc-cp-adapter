@@ -13,17 +13,17 @@ import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference
 public class ProcessData {
   private final long timestamp = currentTimeMillis();
 
-  /** request data */
+  // request data
   private final String assetId;
   private final String provider;
   private String contractOfferId;
 
-  /** contract data * */
+  // contract data
   @Setter private String contractNegotiationId;
   @Setter private String contractAgreementId;
   @Setter private boolean isContractConfirmed = false;
 
-  /** result/response data * */
+  // result/response data
   @Setter private EndpointDataReference endpointDataReference;
   @Setter private String errorMessage;
   @Setter private Response.Status errorStatus;

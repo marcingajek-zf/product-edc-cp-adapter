@@ -9,10 +9,11 @@ import net.catenax.edc.cp.adapter.messaging.ListenerService;
 import net.catenax.edc.cp.adapter.process.contractdatastore.InMemoryContractDataStore;
 import net.catenax.edc.cp.adapter.process.contractnegotiation.ContractNegotiationHandler;
 import net.catenax.edc.cp.adapter.process.contractnotification.ContractNotificationHandler;
-import net.catenax.edc.cp.adapter.process.contractnotification.InMemoryDataStore;
 import net.catenax.edc.cp.adapter.process.datareference.DataReferenceHandler;
+import net.catenax.edc.cp.adapter.process.datareference.InMemorySyncService;
 import net.catenax.edc.cp.adapter.service.ErrorResultService;
 import net.catenax.edc.cp.adapter.service.ResultService;
+import net.catenax.edc.cp.adapter.util.ExpiringMap;
 import net.catenax.edc.cp.adapter.util.LockMap;
 import org.eclipse.dataspaceconnector.api.datamanagement.catalog.service.CatalogServiceImpl;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractnegotiation.service.ContractNegotiationService;
@@ -95,7 +96,8 @@ public class ApiAdapterExtension implements ServiceExtension {
             messageService,
             contractNegotiationService,
             new CatalogServiceImpl(dispatcher),
-            new InMemoryContractDataStore()));
+            new InMemoryContractDataStore(),
+            new ExpiringMap<>()));
   }
 
   private void initContractConfirmationHandler(
@@ -109,7 +111,8 @@ public class ApiAdapterExtension implements ServiceExtension {
         new ContractNotificationHandler(
             monitor,
             messageService,
-            new InMemoryDataStore(new LockMap()),
+            new net.catenax.edc.cp.adapter.process.contractnotification.InMemorySyncService(
+                new LockMap()),
             contractNegotiationService,
             new TransferProcessServiceImpl(
                 transferProcessStore, transferProcessManager, getTransactionContext(monitor)),
@@ -125,10 +128,7 @@ public class ApiAdapterExtension implements ServiceExtension {
       Monitor monitor, InMemoryMessageService messageService, ListenerService listenerService) {
 
     DataReferenceHandler dataReferenceHandler =
-        new DataReferenceHandler(
-            monitor,
-            messageService,
-            new net.catenax.edc.cp.adapter.process.datareference.InMemoryDataStore(new LockMap()));
+        new DataReferenceHandler(monitor, messageService, new InMemorySyncService(new LockMap()));
     listenerService.addListener(Channel.DATA_REFERENCE, dataReferenceHandler);
     receiverRegistry.registerReceiver(dataReferenceHandler);
   }
