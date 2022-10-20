@@ -30,16 +30,18 @@ import net.catenax.edc.cp.adapter.service.ResultService;
 import net.catenax.edc.cp.adapter.util.ExpiringMap;
 import net.catenax.edc.cp.adapter.util.LockMap;
 import org.eclipse.dataspaceconnector.api.datamanagement.catalog.service.CatalogServiceImpl;
+import org.eclipse.dataspaceconnector.api.datamanagement.configuration.DataManagementApiConfiguration;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractnegotiation.service.ContractNegotiationService;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractnegotiation.service.ContractNegotiationServiceImpl;
 import org.eclipse.dataspaceconnector.api.datamanagement.transferprocess.service.TransferProcessServiceImpl;
-import org.eclipse.dataspaceconnector.runtime.metamodel.annotation.Inject;
+
 import org.eclipse.dataspaceconnector.spi.WebService;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.ConsumerContractNegotiationManager;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.observe.ContractNegotiationObservable;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.store.ContractNegotiationStore;
 import org.eclipse.dataspaceconnector.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.system.Inject;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtension;
 import org.eclipse.dataspaceconnector.spi.system.ServiceExtensionContext;
 import org.eclipse.dataspaceconnector.spi.transaction.NoopTransactionContext;
@@ -57,6 +59,7 @@ public class ApiAdapterExtension implements ServiceExtension {
   @Inject private TransferProcessStore transferProcessStore;
   @Inject private TransferProcessManager transferProcessManager;
   @Inject private EndpointDataReferenceReceiverRegistry receiverRegistry;
+  @Inject private DataManagementApiConfiguration config;
 
   @Override
   public String name() {
@@ -94,7 +97,7 @@ public class ApiAdapterExtension implements ServiceExtension {
 
   private void initHttpController(
       Monitor monitor, InMemoryMessageService messageService, ResultService resultService) {
-    webService.registerResource(new HttpController(monitor, resultService, messageService));
+    webService.registerResource(config.getContextAlias(), new HttpController(monitor, resultService, messageService));
   }
 
   private void initContractNegotiationHandler(
