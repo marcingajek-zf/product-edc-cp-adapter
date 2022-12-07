@@ -14,40 +14,31 @@
 
 package net.catenax.edc.cp.adapter.process.contractnegotiation;
 
+import jakarta.ws.rs.core.Response;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
+import java.util.*;
 import lombok.RequiredArgsConstructor;
 import net.catenax.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import net.catenax.edc.cp.adapter.dto.ProcessData;
-import net.catenax.edc.cp.adapter.exception.ExternalRequestException;
 import net.catenax.edc.cp.adapter.exception.ResourceNotFoundException;
 import net.catenax.edc.cp.adapter.messaging.Channel;
 import net.catenax.edc.cp.adapter.messaging.Listener;
 import net.catenax.edc.cp.adapter.messaging.MessageBus;
-import net.catenax.edc.cp.adapter.process.contractdatastore.ContractAgreementData;
-import net.catenax.edc.cp.adapter.process.contractdatastore.ContractDataStore;
-import net.catenax.edc.cp.adapter.util.ExpiringMap;
-import org.eclipse.dataspaceconnector.api.datamanagement.catalog.service.CatalogService;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractnegotiation.service.ContractNegotiationService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
 import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
+import org.eclipse.dataspaceconnector.spi.types.domain.contract.agreement.ContractAgreement;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.negotiation.ContractNegotiation;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.negotiation.ContractOfferRequest;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractOffer;
-import org.jetbrains.annotations.Nullable;
 
 @RequiredArgsConstructor
 public class ContractNegotiationHandler implements Listener<DataReferenceRetrievalDto> {
   private final Monitor monitor;
   private final MessageBus messageBus;
   private final ContractNegotiationService contractNegotiationService;
-  private final CatalogService catalogService;
-  private final ContractDataStore contractDataStore;
-  private final ExpiringMap<String, Catalog> catalogCache;
+  private final CatalogCachedRetriever catalogRetriever;
+  private final ContractAgreementRetriever agreementRetriever;
 
   @Override
   public void process(DataReferenceRetrievalDto dto) {
@@ -56,10 +47,21 @@ public class ContractNegotiationHandler implements Listener<DataReferenceRetriev
             "[%s] RequestHandler: input request: [%s]", dto.getTraceId(), dto.getPayload()));
     ProcessData processData = dto.getPayload();
 
-    ContractAgreementData contractData = getCachedContractData(dto);
-    if (Objects.nonNull(contractData) && isContractValid(contractData)) {
-      monitor.info(String.format("[%s] ContractAgreement taken from cache.", dto.getTraceId()));
-      dto.getPayload().setContractAgreementId(contractData.getId());
+    ContractAgreement contractAgreement = getContractAgreementById(dto);
+    if (Objects.nonNull(dto.getPayload().getContractAgreementId()) && contractAgreement == null) {
+      sendNotFoundErrorResult(dto);
+      return;
+    }
+
+    if (Objects.isNull(contractAgreement)) {
+      contractAgreement =
+          agreementRetriever.getExistingContractByAssetId(dto.getPayload().getAssetId());
+    }
+
+    if (Objects.nonNull(contractAgreement) && isContractValid(contractAgreement)) {
+      monitor.info(
+          String.format("[%s] existing ContractAgreement taken from EDC.", dto.getTraceId()));
+      dto.getPayload().setContractAgreementId(contractAgreement.getId());
       dto.getPayload().setContractConfirmed(true);
       messageBus.send(Channel.CONTRACT_CONFIRMATION, dto);
       return;
@@ -79,14 +81,13 @@ public class ContractNegotiationHandler implements Listener<DataReferenceRetriev
     messageBus.send(Channel.CONTRACT_CONFIRMATION, dto);
   }
 
-  @Nullable
-  private ContractAgreementData getCachedContractData(DataReferenceRetrievalDto dto) {
-    return dto.getPayload().isContractAgreementCacheOn()
-        ? contractDataStore.get(dto.getPayload().getAssetId(), dto.getPayload().getProvider())
-        : null;
+  private ContractAgreement getContractAgreementById(DataReferenceRetrievalDto dto) {
+    return Optional.ofNullable(dto.getPayload().getContractAgreementId())
+        .map(agreementRetriever::getExistingContractById)
+        .orElse(null);
   }
 
-  private boolean isContractValid(ContractAgreementData contractAgreement) {
+  private boolean isContractValid(ContractAgreement contractAgreement) {
     long now = Instant.now().getEpochSecond();
     return Objects.nonNull(contractAgreement)
         && contractAgreement.getContractStartDate() < now
@@ -95,28 +96,13 @@ public class ContractNegotiationHandler implements Listener<DataReferenceRetriev
 
   private ContractOffer findContractOffer(
       String assetId, String providerUrl, int catalogExpiryTime) {
-    Catalog catalog = getCatalog(providerUrl, catalogExpiryTime);
+    Catalog catalog = catalogRetriever.getEntireCatalog(providerUrl, assetId, catalogExpiryTime);
     return Optional.ofNullable(catalog.getContractOffers()).orElse(Collections.emptyList()).stream()
         .filter(it -> it.getAsset().getId().equals(assetId))
         .findFirst()
         .orElseThrow(
             () ->
                 new ResourceNotFoundException("Could not find Contract Offer for given Asset Id"));
-  }
-
-  private Catalog getCatalog(String providerUrl, int catalogExpiryTime) {
-    Catalog catalog = catalogCache.get(providerUrl, catalogExpiryTime);
-    if (Objects.nonNull(catalog)) {
-      return catalog;
-    }
-
-    try {
-      catalog = catalogService.getByProviderUrl(providerUrl, QuerySpec.max()).get();
-      catalogCache.put(providerUrl, catalog);
-      return catalog;
-    } catch (InterruptedException | ExecutionException e) {
-      throw new ExternalRequestException("Could not retrieve contract offer.", e);
-    }
   }
 
   private String initializeContractNegotiation(
@@ -137,5 +123,14 @@ public class ContractNegotiationHandler implements Listener<DataReferenceRetriev
     monitor.info(String.format("[%s] RequestHandler: initiateNegotiation - end", traceId));
     return Optional.ofNullable(contractNegotiation.getId())
         .orElseThrow(() -> new ResourceNotFoundException("Could not find Contract NegotiationId"));
+  }
+
+  private void sendNotFoundErrorResult(DataReferenceRetrievalDto dto) {
+    dto.getPayload()
+        .setErrorMessage(
+            "Not found the contract agreement with ID: "
+                + dto.getPayload().getContractAgreementId());
+    dto.getPayload().setErrorStatus(Response.Status.NOT_FOUND);
+    messageBus.send(Channel.RESULT, dto);
   }
 }

@@ -15,12 +15,15 @@
 package net.catenax.edc.cp.adapter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 import jakarta.ws.rs.core.Response;
+import net.catenax.edc.cp.adapter.dto.ProcessData;
 import net.catenax.edc.cp.adapter.messaging.MessageBus;
 import net.catenax.edc.cp.adapter.service.ResultService;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
+import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,7 +42,7 @@ public class HttpControllerTest {
     HttpController httpController = new HttpController(monitor, resultService, messageBus, config);
 
     // when
-    Response response = httpController.getAssetSynchronous(null, "providerUrl");
+    Response response = httpController.getAssetSynchronous(null, "providerUrl", null, null);
 
     // then
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -56,9 +59,37 @@ public class HttpControllerTest {
     HttpController httpController = new HttpController(monitor, resultService, messageBus, config);
 
     // when
-    Response response = httpController.getAssetSynchronous("assetId", null);
+    Response response = httpController.getAssetSynchronous("assetId", null, null, null);
 
     // then
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
+  }
+
+  @Test
+  public void getAssetSynchronous_shouldReturnOkResponse() throws InterruptedException {
+    // given
+    Monitor monitor = Mockito.mock(Monitor.class);
+    ResultService resultService = Mockito.mock(ResultService.class);
+    MessageBus messageBus = Mockito.mock(MessageBus.class);
+    ApiAdapterConfig config = Mockito.mock(ApiAdapterConfig.class);
+    when(config.getDefaultMessageRetryNumber()).thenReturn(RETRY_NUMBER);
+    HttpController httpController = new HttpController(monitor, resultService, messageBus, config);
+    when(resultService.pull(anyString()))
+        .thenReturn(
+            ProcessData.builder().endpointDataReference(getEndpointDataReference()).build());
+
+    // when
+    Response response = httpController.getAssetSynchronous("assetId", "providerUrl", null, null);
+
+    // then
+    assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+  }
+
+  private EndpointDataReference getEndpointDataReference() {
+    return EndpointDataReference.Builder.newInstance()
+        .endpoint("endpoint")
+        .authCode("authCode")
+        .authKey("authKey")
+        .build();
   }
 }

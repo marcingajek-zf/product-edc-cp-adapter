@@ -42,13 +42,17 @@ public class HttpController {
   @GET
   @Path("sync/{assetId}")
   public Response getAssetSynchronous(
-      @PathParam("assetId") String assetId, @QueryParam("providerUrl") String providerUrl) {
+      @PathParam("assetId") String assetId,
+      @QueryParam("providerUrl") String providerUrl,
+      @QueryParam("contractAgreementId") String contractAgreementId,
+      @QueryParam("contractAgreementReuse") String contractAgreementReuse) {
 
     if (invalidParams(assetId, providerUrl)) {
       return badRequestResponse();
     }
 
-    String traceId = initiateProcess(assetId, providerUrl);
+    String traceId =
+        initiateProcess(assetId, providerUrl, contractAgreementId, contractAgreementReuse);
 
     try {
       ProcessData processData = resultService.pull(traceId);
@@ -79,12 +83,28 @@ public class HttpController {
     return isNull(assetId) || assetId.isBlank() || isNull(providerUrl) || providerUrl.isBlank();
   }
 
-  private String initiateProcess(String assetId, String providerUrl) {
-    ProcessData processData = getProcessData(assetId, providerUrl);
+  private String initiateProcess(
+      String assetId,
+      String providerUrl,
+      String contractAgreementId,
+      String contractAgreementReuse) {
+    ProcessData processData =
+        ProcessData.builder()
+            .assetId(assetId)
+            .provider(providerUrl)
+            .contractAgreementId(contractAgreementId)
+            .contractAgreementReuseOn(isContractAgreementReuseOn(contractAgreementReuse))
+            .catalogExpiryTime(config.getCatalogExpireAfterTime())
+            .build();
+
     Message<ProcessData> message =
         new DataReferenceRetrievalDto(processData, config.getDefaultMessageRetryNumber());
     messageBus.send(Channel.INITIAL, message);
     return message.getTraceId();
+  }
+
+  private boolean isContractAgreementReuseOn(String contractAgreementReuse) {
+    return !"0".equals(contractAgreementReuse) && config.isContractAgreementReuseOn();
   }
 
   private Response notFoundResponse() {
@@ -108,15 +128,6 @@ public class HttpController {
   private Response timeoutResponse() {
     return Response.status(Response.Status.REQUEST_TIMEOUT)
         .entity(Response.Status.REQUEST_TIMEOUT.getReasonPhrase())
-        .build();
-  }
-
-  private ProcessData getProcessData(String assetId, String providerUrl) {
-    return ProcessData.builder()
-        .assetId(assetId)
-        .provider(providerUrl)
-        .contractAgreementCacheOn(config.isContractAgreementCacheOn())
-        .catalogExpiryTime(config.getCatalogExpireAfterTime())
         .build();
   }
 }
