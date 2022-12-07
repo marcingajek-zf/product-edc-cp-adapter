@@ -11,4 +11,4 @@
 # ZF Friedrichshafen AG - Initial API and Implementation
 #
 
-net.catenax.edc.cp.adapter.ApiAdapterExtension
+org.eclipse.tractusx.edc.cp.adapter.ApiAdapterExtension
