@@ -1,3 +1,17 @@
+/*
+ * Copyright (c) 2022 ZF Friedrichshafen AG
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Apache License, Version 2.0 which is available at
+ * https://www.apache.org/licenses/LICENSE-2.0
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ * Contributors:
+ * ZF Friedrichshafen AG - Initial API and Implementation
+ *
+ */
+
 package net.catenax.edc.cp.adapter.process.contractnotification;
 
 import static java.util.Objects.isNull;
@@ -7,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import net.catenax.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import net.catenax.edc.cp.adapter.messaging.Channel;
 import net.catenax.edc.cp.adapter.messaging.MessageBus;
-import net.catenax.edc.cp.adapter.process.contractdatastore.ContractDataStore;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.observe.ContractNegotiationListener;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.negotiation.ContractNegotiation;
@@ -19,7 +32,6 @@ public class ContractNegotiationListenerImpl implements ContractNegotiationListe
   private final Monitor monitor;
   private final MessageBus messageBus;
   private final ContractNotificationSyncService syncService;
-  private final ContractDataStore contractDataStore;
   private final DataTransferInitializer dataTransfer;
 
   @Override
@@ -34,10 +46,6 @@ public class ContractNegotiationListenerImpl implements ContractNegotiationListe
     }
     dto.getPayload().setContractAgreementId(agreementId);
     initiateDataTransfer(dto);
-    contractDataStore.add(
-        dto.getPayload().getAssetId(),
-        dto.getPayload().getProvider(),
-        negotiation.getContractAgreement());
     syncService.removeDto(negotiationId);
   }
 

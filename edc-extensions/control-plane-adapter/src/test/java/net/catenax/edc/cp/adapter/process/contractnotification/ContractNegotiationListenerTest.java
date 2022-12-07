@@ -11,7 +11,6 @@ import net.catenax.edc.cp.adapter.dto.ProcessData;
 import net.catenax.edc.cp.adapter.messaging.Channel;
 import net.catenax.edc.cp.adapter.messaging.Message;
 import net.catenax.edc.cp.adapter.messaging.MessageBus;
-import net.catenax.edc.cp.adapter.process.contractdatastore.ContractDataStore;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.contract.negotiation.observe.ContractNegotiationListener;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
@@ -29,7 +28,6 @@ public class ContractNegotiationListenerTest {
   @Mock Monitor monitor;
   @Mock MessageBus messageBus;
   @Mock ContractNotificationSyncService syncService;
-  @Mock ContractDataStore contractDataStore;
   @Mock DataTransferInitializer dataTransfer;
 
   @BeforeEach
@@ -41,8 +39,7 @@ public class ContractNegotiationListenerTest {
   public void confirmed_shouldNotInitiateTransferIfMessageNotAvailable() {
     // given
     ContractNegotiationListener listener =
-        new ContractNegotiationListenerImpl(
-            monitor, messageBus, syncService, contractDataStore, dataTransfer);
+        new ContractNegotiationListenerImpl(monitor, messageBus, syncService, dataTransfer);
     ContractNegotiation contractNegotiation = getConfirmedContractNegotiation();
 
     // when
@@ -62,8 +59,7 @@ public class ContractNegotiationListenerTest {
     verify(dataTransfer, times(0)).initiate(any());
 
     ContractNegotiationListener listener =
-        new ContractNegotiationListenerImpl(
-            monitor, messageBus, syncService, contractDataStore, dataTransfer);
+        new ContractNegotiationListenerImpl(monitor, messageBus, syncService, dataTransfer);
     ContractNegotiation contractNegotiation = getConfirmedContractNegotiation();
 
     // when
@@ -80,8 +76,7 @@ public class ContractNegotiationListenerTest {
     when(syncService.exchangeDeclinedContract(any()))
         .thenReturn(new DataReferenceRetrievalDto(getProcessData(), 3));
     ContractNegotiationListener listener =
-        new ContractNegotiationListenerImpl(
-            monitor, messageBus, syncService, contractDataStore, dataTransfer);
+        new ContractNegotiationListenerImpl(monitor, messageBus, syncService, dataTransfer);
     ContractNegotiation contractNegotiation = getConfirmedContractNegotiation();
 
     // when
@@ -101,8 +96,7 @@ public class ContractNegotiationListenerTest {
     when(syncService.exchangeErrorContract(any()))
         .thenReturn(new DataReferenceRetrievalDto(getProcessData(), 3));
     ContractNegotiationListener listener =
-        new ContractNegotiationListenerImpl(
-            monitor, messageBus, syncService, contractDataStore, dataTransfer);
+        new ContractNegotiationListenerImpl(monitor, messageBus, syncService, dataTransfer);
     ContractNegotiation contractNegotiation = getConfirmedContractNegotiation();
 
     // when

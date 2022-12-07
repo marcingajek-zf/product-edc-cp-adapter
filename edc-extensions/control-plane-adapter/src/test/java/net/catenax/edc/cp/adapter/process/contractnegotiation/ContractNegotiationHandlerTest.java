@@ -20,20 +20,16 @@ import static org.mockito.Mockito.*;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 import net.catenax.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import net.catenax.edc.cp.adapter.dto.ProcessData;
 import net.catenax.edc.cp.adapter.messaging.Message;
 import net.catenax.edc.cp.adapter.messaging.MessageBus;
-import net.catenax.edc.cp.adapter.process.contractdatastore.ContractAgreementData;
-import net.catenax.edc.cp.adapter.process.contractdatastore.ContractDataStore;
-import net.catenax.edc.cp.adapter.util.ExpiringMap;
-import org.eclipse.dataspaceconnector.api.datamanagement.catalog.service.CatalogService;
 import org.eclipse.dataspaceconnector.api.datamanagement.contractnegotiation.service.ContractNegotiationService;
 import org.eclipse.dataspaceconnector.policy.model.Policy;
 import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
 import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
 import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
+import org.eclipse.dataspaceconnector.spi.types.domain.contract.agreement.ContractAgreement;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.negotiation.ContractNegotiation;
 import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractOffer;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,8 +41,8 @@ public class ContractNegotiationHandlerTest {
   @Mock Monitor monitor;
   @Mock MessageBus messageBus;
   @Mock ContractNegotiationService contractNegotiationService;
-  @Mock CatalogService catalogService;
-  @Mock ContractDataStore contractDataStore;
+  @Mock CatalogCachedRetriever catalogRetriever;
+  @Mock ContractAgreementRetriever agreementRetriever;
 
   @BeforeEach
   void init() {
@@ -54,19 +50,14 @@ public class ContractNegotiationHandlerTest {
   }
 
   @Test
-  public void process_shouldNotInitializeContractNegotiationWhenCachedContractAlreadyAvailable() {
+  public void process_shouldNotInitializeContractNegotiationWhenContractAlreadyAvailable() {
     // given
     ContractNegotiationHandler contractNegotiationHandler =
         new ContractNegotiationHandler(
-            monitor,
-            messageBus,
-            contractNegotiationService,
-            catalogService,
-            contractDataStore,
-            new ExpiringMap<>());
+            monitor, messageBus, contractNegotiationService, catalogRetriever, agreementRetriever);
 
-    when(contractDataStore.get(anyString(), anyString()))
-        .thenReturn(getValidContractAgreementData());
+    when(agreementRetriever.getExistingContractByAssetId(anyString()))
+        .thenReturn(getValidContractAgreement());
 
     // when
     contractNegotiationHandler.process(new DataReferenceRetrievalDto(getProcessData(), 3));
@@ -77,21 +68,16 @@ public class ContractNegotiationHandlerTest {
   }
 
   @Test
-  public void process_shouldInitializeContractNegotiationWhenCachedContractExpired() {
+  public void process_shouldInitializeContractNegotiationWhenExistingContractExpired() {
     // given
     ContractNegotiationHandler contractNegotiationHandler =
         new ContractNegotiationHandler(
-            monitor,
-            messageBus,
-            contractNegotiationService,
-            catalogService,
-            contractDataStore,
-            new ExpiringMap<>());
+            monitor, messageBus, contractNegotiationService, catalogRetriever, agreementRetriever);
 
-    when(contractDataStore.get(anyString(), anyString()))
-        .thenReturn(getExpiredContractAgreementData());
-    when(catalogService.getByProviderUrl(anyString(), any()))
-        .thenReturn(CompletableFuture.completedFuture(getCatalog()));
+    when(agreementRetriever.getExistingContractByAssetId(anyString()))
+        .thenReturn(getExpiredContractAgreement());
+    when(catalogRetriever.getEntireCatalog(anyString(), anyString(), anyInt()))
+        .thenReturn(getCatalog());
     when(contractNegotiationService.initiateNegotiation(any()))
         .thenReturn(getContractNegotiation());
 
@@ -104,20 +90,15 @@ public class ContractNegotiationHandlerTest {
   }
 
   @Test
-  public void process_shouldInitiateContractNegotiationAndSendDtoFurtherIfCacheEmpty() {
+  public void process_shouldInitiateContractNegotiationAndSendDtoFurtherIfAgreementNotExist() {
     // given
     ContractNegotiationHandler contractNegotiationHandler =
         new ContractNegotiationHandler(
-            monitor,
-            messageBus,
-            contractNegotiationService,
-            catalogService,
-            contractDataStore,
-            new ExpiringMap<>());
+            monitor, messageBus, contractNegotiationService, catalogRetriever, agreementRetriever);
 
-    when(contractDataStore.get(anyString(), anyString())).thenReturn(null);
-    when(catalogService.getByProviderUrl(anyString(), any()))
-        .thenReturn(CompletableFuture.completedFuture(getCatalog()));
+    when(agreementRetriever.getExistingContractByAssetId(anyString())).thenReturn(null);
+    when(catalogRetriever.getEntireCatalog(anyString(), anyString(), anyInt()))
+        .thenReturn(getCatalog());
     when(contractNegotiationService.initiateNegotiation(any()))
         .thenReturn(getContractNegotiation());
 
@@ -134,7 +115,7 @@ public class ContractNegotiationHandlerTest {
         .assetId("assetId")
         .provider("provider")
         .catalogExpiryTime(30)
-        .contractAgreementCacheOn(true)
+        .contractAgreementReuseOn(true)
         .build();
   }
 
@@ -163,20 +144,29 @@ public class ContractNegotiationHandlerTest {
         .build();
   }
 
-  private ContractAgreementData getValidContractAgreementData() {
+  private ContractAgreement getValidContractAgreement() {
     long now = Instant.now().getEpochSecond();
-    ContractAgreementData contractAgreementData = new ContractAgreementData();
-    contractAgreementData.setId("id");
-    contractAgreementData.setAssetId("assetId");
-    contractAgreementData.setContractStartDate(now - 5000);
-    contractAgreementData.setContractEndDate(now + 5000);
-    return contractAgreementData;
+    return ContractAgreement.Builder.newInstance()
+        .id("id")
+        .assetId("assetId")
+        .contractStartDate(now - 5000)
+        .contractEndDate(now + 5000)
+        .consumerAgentId("consumer")
+        .providerAgentId("provider")
+        .policy(Policy.Builder.newInstance().build())
+        .build();
   }
 
-  private ContractAgreementData getExpiredContractAgreementData() {
+  private ContractAgreement getExpiredContractAgreement() {
     long now = Instant.now().getEpochSecond();
-    ContractAgreementData contractAgreementData = getValidContractAgreementData();
-    contractAgreementData.setContractEndDate(now - 1000);
-    return contractAgreementData;
+    return ContractAgreement.Builder.newInstance()
+        .id("id")
+        .assetId("assetId")
+        .contractStartDate(now - 5000)
+        .contractEndDate(now - 1000)
+        .consumerAgentId("consumer")
+        .providerAgentId("provider")
+        .policy(Policy.Builder.newInstance().build())
+        .build();
   }
 }
