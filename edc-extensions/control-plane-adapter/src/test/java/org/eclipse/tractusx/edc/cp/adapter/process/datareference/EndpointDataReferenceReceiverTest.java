@@ -4,9 +4,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
-import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.transfer.edr.EndpointDataReferenceReceiver;
-import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference;
+import org.eclipse.edc.connector.transfer.spi.edr.EndpointDataReferenceReceiver;
+import org.eclipse.edc.spi.monitor.Monitor;
+import org.eclipse.edc.spi.types.domain.edr.EndpointDataReference;
 import org.eclipse.tractusx.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import org.eclipse.tractusx.edc.cp.adapter.dto.ProcessData;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.Channel;

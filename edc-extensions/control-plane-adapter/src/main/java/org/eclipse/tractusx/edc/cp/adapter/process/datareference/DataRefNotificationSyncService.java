@@ -14,7 +14,7 @@
 
 package org.eclipse.tractusx.edc.cp.adapter.process.datareference;
 
-import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference;
+import org.eclipse.edc.spi.types.domain.edr.EndpointDataReference;
 import org.eclipse.tractusx.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 
 public interface DataRefNotificationSyncService {

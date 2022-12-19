@@ -17,8 +17,8 @@ package org.eclipse.tractusx.edc.cp.adapter.process.datareference;
 import static java.util.Objects.isNull;
 
 import lombok.RequiredArgsConstructor;
-import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference;
+import org.eclipse.edc.spi.monitor.Monitor;
+import org.eclipse.edc.spi.types.domain.edr.EndpointDataReference;
 import org.eclipse.tractusx.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.Channel;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.Listener;

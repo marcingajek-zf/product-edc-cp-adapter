@@ -19,10 +19,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.dataspaceconnector.api.datamanagement.catalog.service.CatalogService;
-import org.eclipse.dataspaceconnector.spi.query.Criterion;
-import org.eclipse.dataspaceconnector.spi.query.QuerySpec;
-import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
+import org.eclipse.edc.catalog.spi.Catalog;
+import org.eclipse.edc.connector.spi.catalog.CatalogService;
+import org.eclipse.edc.spi.query.Criterion;
+import org.eclipse.edc.spi.query.QuerySpec;
 import org.eclipse.tractusx.edc.cp.adapter.exception.ExternalRequestException;
 
 @RequiredArgsConstructor

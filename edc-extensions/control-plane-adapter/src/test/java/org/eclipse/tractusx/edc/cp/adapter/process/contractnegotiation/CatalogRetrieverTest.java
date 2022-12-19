@@ -19,15 +19,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import org.eclipse.dataspaceconnector.api.datamanagement.catalog.service.CatalogService;
-import org.eclipse.dataspaceconnector.policy.model.Policy;
-import org.eclipse.dataspaceconnector.spi.types.domain.asset.Asset;
-import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
-import org.eclipse.dataspaceconnector.spi.types.domain.contract.offer.ContractOffer;
+import org.eclipse.edc.catalog.spi.Catalog;
+import org.eclipse.edc.connector.contract.spi.types.offer.ContractOffer;
+import org.eclipse.edc.connector.spi.catalog.CatalogService;
+import org.eclipse.edc.policy.model.Policy;
+import org.eclipse.edc.spi.types.domain.asset.Asset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -84,6 +85,8 @@ public class CatalogRetrieverTest {
         .id("id")
         .asset(asset)
         .policy(Policy.Builder.newInstance().build())
+        .contractStart(ZonedDateTime.now())
+        .contractEnd(ZonedDateTime.now().plusDays(1))
         .build();
   }
 }

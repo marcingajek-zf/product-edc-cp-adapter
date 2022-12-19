@@ -4,10 +4,10 @@ import static java.util.Objects.isNull;
 
 import java.util.concurrent.CompletableFuture;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.result.Result;
-import org.eclipse.dataspaceconnector.spi.transfer.edr.EndpointDataReferenceReceiver;
-import org.eclipse.dataspaceconnector.spi.types.domain.edr.EndpointDataReference;
+import org.eclipse.edc.connector.transfer.spi.edr.EndpointDataReferenceReceiver;
+import org.eclipse.edc.spi.monitor.Monitor;
+import org.eclipse.edc.spi.result.Result;
+import org.eclipse.edc.spi.types.domain.edr.EndpointDataReference;
 import org.eclipse.tractusx.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.Channel;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.MessageBus;

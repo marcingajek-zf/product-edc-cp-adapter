@@ -16,7 +16,7 @@ package org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation;
 
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.dataspaceconnector.spi.types.domain.catalog.Catalog;
+import org.eclipse.edc.catalog.spi.Catalog;
 import org.eclipse.tractusx.edc.cp.adapter.util.ExpiringMap;
 
 @RequiredArgsConstructor

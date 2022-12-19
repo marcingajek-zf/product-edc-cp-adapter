@@ -114,6 +114,10 @@
             <groupId>org.eclipse.edc</groupId>
             <artifactId>aggregate-service-spi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.edc</groupId>
+            <artifactId>control-plane-aggregate-services</artifactId>
+        </dependency>
 
         <!-- External Dependencies -->
         <dependency>
