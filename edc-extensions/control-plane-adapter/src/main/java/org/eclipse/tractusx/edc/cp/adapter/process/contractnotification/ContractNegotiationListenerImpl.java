@@ -18,9 +18,9 @@ import static java.util.Objects.isNull;
 
 import jakarta.ws.rs.core.Response;
 import lombok.RequiredArgsConstructor;
-import org.eclipse.dataspaceconnector.spi.contract.negotiation.observe.ContractNegotiationListener;
-import org.eclipse.dataspaceconnector.spi.monitor.Monitor;
-import org.eclipse.dataspaceconnector.spi.types.domain.contract.negotiation.ContractNegotiation;
+import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationListener;
+import org.eclipse.edc.connector.contract.spi.types.negotiation.ContractNegotiation;
+import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.tractusx.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.Channel;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.MessageBus;
