@@ -20,8 +20,8 @@ import org.eclipse.edc.connector.api.management.configuration.ManagementApiConfi
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationListener;
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationObservable;
 import org.eclipse.edc.connector.contract.spi.negotiation.store.ContractNegotiationStore;
-import org.eclipse.edc.connector.service.catalog.CatalogServiceImpl;
-import org.eclipse.edc.connector.service.contractagreement.ContractAgreementServiceImpl;
+import org.eclipse.edc.connector.spi.catalog.CatalogService;
+import org.eclipse.edc.connector.spi.contractagreement.ContractAgreementService;
 import org.eclipse.edc.connector.spi.contractnegotiation.ContractNegotiationService;
 import org.eclipse.edc.connector.spi.transferprocess.TransferProcessService;
 import org.eclipse.edc.connector.transfer.spi.edr.EndpointDataReferenceReceiver;
@@ -61,6 +61,8 @@ public class ApiAdapterExtension implements ServiceExtension {
   @Inject private TransferProcessService transferProcessService;
   @Inject private ContractNegotiationStore contractNegotiationStore;
   @Inject private TransactionContext transactionContext;
+  @Inject private CatalogService catalogService;
+  @Inject private ContractAgreementService agreementService;
 
   @Override
   public String name() {
@@ -125,11 +127,8 @@ public class ApiAdapterExtension implements ServiceExtension {
         monitor,
         messageBus,
         contractNegotiationService,
-        new CatalogCachedRetriever(
-            new CatalogRetriever(new CatalogServiceImpl(dispatcher)), new ExpiringMap<>()),
-        new ContractAgreementRetriever(
-            monitor,
-            new ContractAgreementServiceImpl(contractNegotiationStore, transactionContext)));
+        new CatalogCachedRetriever(new CatalogRetriever(catalogService), new ExpiringMap<>()),
+        new ContractAgreementRetriever(monitor, agreementService));
   }
 
   private void initDataReferenceReceiver(
