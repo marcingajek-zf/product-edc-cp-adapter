@@ -21,11 +21,23 @@ public class ApiAdapterConfig {
       "edc.cp.adapter.default.message.retry.number";
   private static final String DEFAULT_SYNC_REQUEST_TIMEOUT =
       "edc.cp.adapter.default.sync.request.timeout";
-  private static final String IN_MEMORY_MESSAGE_BUS_THREAD_NUMBER =
-      "edc.cp.adapter.messagebus.inmemory.thread.number";
   private static final String CATALOG_EXPIRE_AFTER_TIME =
       "edc.cp.adapter.cache.catalog.expire.after";
-  private static final String REUSE_CONTRACT_AGREEMENT = "edc.cp.adapter.reuse.contract.agreement";
+  private static final String REUSE_CONTRACT_AGREEMENT =
+      "edc.cp.adapter.reuse.contract.agreement";
+  private static final String DATASOURCE_NAME =
+      "edc.datasource.cpadapter.name";
+
+  private static final String IN_MEMORY_MESSAGE_BUS_THREAD_NUMBER =
+      "edc.cp.adapter.messagebus.inmemory.thread.number";
+
+  private static final String SQL_MESSAGE_BUS_THREAD_NUMBER =
+      "edc.cp.adapter.messagebus.sql.thread.number";
+  private static final String SQL_MESSAGE_BUS_MAX_DELIVERY =
+      "edc.cp.adapter.messagebus.sql.max.delivery";
+  private static final String SQL_MESSAGE_BUS_DELIVERY_INTERVAL =
+      "edc.cp.adapter.messagebus.sql.max.delivery";
+
 
   private final ServiceExtensionContext context;
 
@@ -52,4 +64,21 @@ public class ApiAdapterConfig {
   public int getCatalogExpireAfterTime() {
     return context.getSetting(CATALOG_EXPIRE_AFTER_TIME, 3600);
   }
+
+  public String getDataSourceName() {
+    return context.getSetting(DATASOURCE_NAME, "cpadapter");
+  }
+
+  public int getSqlMessageBusThreadNumber() {
+    return context.getSetting(SQL_MESSAGE_BUS_THREAD_NUMBER, 10);
+  }
+
+  public int getSqlMessageBusMaxDelivery() {
+    return context.getSetting(SQL_MESSAGE_BUS_MAX_DELIVERY, 10);
+  }
+
+  public int getSqlMessageBusDeliveryInterval() {
+    return context.getSetting(SQL_MESSAGE_BUS_DELIVERY_INTERVAL, 1);
+  }
+
 }

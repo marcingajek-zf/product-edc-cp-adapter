@@ -19,7 +19,6 @@ import static java.util.Objects.nonNull;
 import org.eclipse.edc.connector.api.management.configuration.ManagementApiConfiguration;
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationListener;
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationObservable;
-import org.eclipse.edc.connector.contract.spi.negotiation.store.ContractNegotiationStore;
 import org.eclipse.edc.connector.spi.catalog.CatalogService;
 import org.eclipse.edc.connector.spi.contractagreement.ContractAgreementService;
 import org.eclipse.edc.connector.spi.contractnegotiation.ContractNegotiationService;
@@ -27,15 +26,13 @@ import org.eclipse.edc.connector.spi.transferprocess.TransferProcessService;
 import org.eclipse.edc.connector.transfer.spi.edr.EndpointDataReferenceReceiver;
 import org.eclipse.edc.connector.transfer.spi.edr.EndpointDataReferenceReceiverRegistry;
 import org.eclipse.edc.runtime.metamodel.annotation.Inject;
-import org.eclipse.edc.spi.message.RemoteMessageDispatcherRegistry;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.spi.system.ServiceExtension;
 import org.eclipse.edc.spi.system.ServiceExtensionContext;
+import org.eclipse.edc.transaction.datasource.spi.DataSourceRegistry;
 import org.eclipse.edc.transaction.spi.TransactionContext;
 import org.eclipse.edc.web.spi.WebService;
-import org.eclipse.tractusx.edc.cp.adapter.messaging.Channel;
-import org.eclipse.tractusx.edc.cp.adapter.messaging.InMemoryMessageBus;
-import org.eclipse.tractusx.edc.cp.adapter.messaging.ListenerService;
+import org.eclipse.tractusx.edc.cp.adapter.messaging.*;
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.CatalogCachedRetriever;
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.CatalogRetriever;
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.ContractAgreementRetriever;
@@ -47,22 +44,30 @@ import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataReferenceHa
 import org.eclipse.tractusx.edc.cp.adapter.process.datareference.EndpointDataReferenceReceiverImpl;
 import org.eclipse.tractusx.edc.cp.adapter.service.ErrorResultService;
 import org.eclipse.tractusx.edc.cp.adapter.service.ResultService;
+import org.eclipse.tractusx.edc.cp.adapter.store.SqlQueueStore;
+import org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres.PostgresDialectStatements;
 import org.eclipse.tractusx.edc.cp.adapter.util.ExpiringMap;
 import org.eclipse.tractusx.edc.cp.adapter.util.LockMap;
+
+import java.time.Clock;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class ApiAdapterExtension implements ServiceExtension {
   @Inject private Monitor monitor;
   @Inject private ContractNegotiationObservable negotiationObservable;
   @Inject private WebService webService;
   @Inject private ContractNegotiationService contractNegotiationService;
-  @Inject private RemoteMessageDispatcherRegistry dispatcher;
   @Inject private EndpointDataReferenceReceiverRegistry receiverRegistry;
   @Inject private ManagementApiConfiguration apiConfig;
   @Inject private TransferProcessService transferProcessService;
-  @Inject private ContractNegotiationStore contractNegotiationStore;
   @Inject private TransactionContext transactionContext;
   @Inject private CatalogService catalogService;
   @Inject private ContractAgreementService agreementService;
+  @Inject private DataSourceRegistry dataSourceRegistry;
+  @Inject private Clock clock;
+
 
   @Override
   public String name() {
@@ -73,11 +78,10 @@ public class ApiAdapterExtension implements ServiceExtension {
   public void initialize(ServiceExtensionContext context) {
     ApiAdapterConfig config = new ApiAdapterConfig(context);
     ListenerService listenerService = new ListenerService();
-    InMemoryMessageBus messageBus =
-        new InMemoryMessageBus(
-            monitor, listenerService, config.getInMemoryMessageBusThreadNumber());
 
-    ResultService resultService = new ResultService(config.getDefaultSyncRequestTimeout());
+    MessageBus messageBus = createMessageBus(listenerService, context, config);
+
+    ResultService resultService = new ResultService(config.getDefaultSyncRequestTimeout(), monitor);
     ErrorResultService errorResultService = new ErrorResultService(monitor, messageBus);
     ContractNotificationSyncService contractSyncService =
         new ContractInMemorySyncService(new LockMap());
@@ -109,9 +113,35 @@ public class ApiAdapterExtension implements ServiceExtension {
     initDataReferenceReceiver(monitor, messageBus, dataRefSyncService);
   }
 
+  private MessageBus createMessageBus(ListenerService listenerService, ServiceExtensionContext context, ApiAdapterConfig config) {
+    // TODO config SQL + default inmemory
+    if (false) {
+      return new InMemoryMessageBus(
+            monitor, listenerService, config.getInMemoryMessageBusThreadNumber());
+    }
+
+    SqlQueueStore sqlQueueStore = new SqlQueueStore(dataSourceRegistry, config.getDataSourceName(),
+        transactionContext, context.getTypeManager().getMapper(), new PostgresDialectStatements(), context.getConnectorId(),
+        clock);
+    SqlMessageBus messageBus = new SqlMessageBus(monitor, listenerService, sqlQueueStore,
+        config.getSqlMessageBusThreadNumber(),
+        config.getSqlMessageBusMaxDelivery());
+    initMessageBus(messageBus, config);
+
+    return messageBus;
+  }
+
+  private void initMessageBus(SqlMessageBus messageBus, ApiAdapterConfig config) {
+    final int poolSize = 1;
+    final int initialDelay = 5;
+    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(poolSize);
+    scheduler.scheduleAtFixedRate(() -> messageBus.deliverMessages(config.getSqlMessageBusMaxDelivery()),
+        initialDelay, config.getSqlMessageBusDeliveryInterval(), TimeUnit.SECONDS);
+  }
+
   private void initHttpController(
       Monitor monitor,
-      InMemoryMessageBus messageBus,
+      MessageBus messageBus,
       ResultService resultService,
       ApiAdapterConfig config) {
     webService.registerResource(
@@ -122,7 +152,7 @@ public class ApiAdapterExtension implements ServiceExtension {
   private ContractNegotiationHandler getContractNegotiationHandler(
       Monitor monitor,
       ContractNegotiationService contractNegotiationService,
-      InMemoryMessageBus messageBus) {
+      MessageBus messageBus) {
     return new ContractNegotiationHandler(
         monitor,
         messageBus,
@@ -133,7 +163,7 @@ public class ApiAdapterExtension implements ServiceExtension {
 
   private void initDataReferenceReceiver(
       Monitor monitor,
-      InMemoryMessageBus messageBus,
+      MessageBus messageBus,
       DataRefNotificationSyncService dataRefSyncService) {
     EndpointDataReferenceReceiver dataReferenceReceiver =
         new EndpointDataReferenceReceiverImpl(monitor, messageBus, dataRefSyncService);
@@ -143,7 +173,7 @@ public class ApiAdapterExtension implements ServiceExtension {
   private void initContractNegotiationListener(
       Monitor monitor,
       ContractNegotiationObservable negotiationObservable,
-      InMemoryMessageBus messageBus,
+      MessageBus messageBus,
       ContractNotificationSyncService contractSyncService,
       DataTransferInitializer dataTransferInitializer) {
     ContractNegotiationListener contractNegotiationListener =
