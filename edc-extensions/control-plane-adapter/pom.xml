@@ -115,6 +115,28 @@
             <artifactId>aggregate-service-spi</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.eclipse.edc</groupId>
+            <artifactId>sql-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.edc</groupId>
+            <artifactId>sql-lease</artifactId>
+            <version>0.0.1-20221201-SNAPSHOT</version> <!-- TODO why needs version -->
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.edc</groupId>
+            <artifactId>sql-pool-apache-commons</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.edc</groupId>
+            <artifactId>transaction-datasource-spi</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+        </dependency>
+
         <!-- External Dependencies -->
         <dependency>
             <groupId>org.projectlombok</groupId>
