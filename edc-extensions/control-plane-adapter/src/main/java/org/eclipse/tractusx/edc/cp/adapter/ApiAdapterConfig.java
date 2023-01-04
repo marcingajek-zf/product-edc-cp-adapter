@@ -62,7 +62,7 @@ public class ApiAdapterConfig {
   }
 
   public int getCatalogExpireAfterTime() {
-    return context.getSetting(CATALOG_EXPIRE_AFTER_TIME, 3600);
+    return context.getSetting(CATALOG_EXPIRE_AFTER_TIME, 180);
   }
 
   public String getDataSourceName() {
@@ -80,5 +80,4 @@ public class ApiAdapterConfig {
   public int getSqlMessageBusDeliveryInterval() {
     return context.getSetting(SQL_MESSAGE_BUS_DELIVERY_INTERVAL, 1);
   }
-
 }
