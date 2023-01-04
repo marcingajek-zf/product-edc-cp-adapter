@@ -43,6 +43,8 @@ import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataRefNotifica
 import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataReferenceHandler;
 import org.eclipse.tractusx.edc.cp.adapter.process.datareference.EndpointDataReferenceReceiverImpl;
 import org.eclipse.tractusx.edc.cp.adapter.service.ErrorResultService;
+import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreService;
+import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreServiceInMemory;
 import org.eclipse.tractusx.edc.cp.adapter.service.ResultService;
 import org.eclipse.tractusx.edc.cp.adapter.store.SqlQueueStore;
 import org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres.PostgresDialectStatements;
@@ -68,7 +70,6 @@ public class ApiAdapterExtension implements ServiceExtension {
   @Inject private DataSourceRegistry dataSourceRegistry;
   @Inject private Clock clock;
 
-
   @Override
   public String name() {
     return "Control Plane Adapter Extension";
@@ -81,12 +82,17 @@ public class ApiAdapterExtension implements ServiceExtension {
 
     MessageBus messageBus = createMessageBus(listenerService, context, config);
 
+    ObjectStoreService storeService = new ObjectStoreServiceInMemory(context.getTypeManager().getMapper());
+
     ResultService resultService = new ResultService(config.getDefaultSyncRequestTimeout(), monitor);
     ErrorResultService errorResultService = new ErrorResultService(monitor, messageBus);
+
     ContractNotificationSyncService contractSyncService =
-        new ContractInMemorySyncService(new LockMap());
+        new ContractInMemorySyncService(storeService, new LockMap());
+
     DataTransferInitializer dataTransferInitializer =
         new DataTransferInitializer(monitor, transferProcessService);
+
     ContractNotificationHandler contractNotificationHandler =
         new ContractNotificationHandler(
             monitor,
@@ -94,10 +100,12 @@ public class ApiAdapterExtension implements ServiceExtension {
             contractSyncService,
             contractNegotiationService,
             dataTransferInitializer);
+
     ContractNegotiationHandler contractNegotiationHandler =
         getContractNegotiationHandler(monitor, contractNegotiationService, messageBus, config);
+
     DataRefNotificationSyncService dataRefSyncService =
-        new DataRefInMemorySyncService(new LockMap());
+        new DataRefInMemorySyncService(storeService, new LockMap());
     DataReferenceHandler dataReferenceHandler =
         new DataReferenceHandler(monitor, messageBus, dataRefSyncService);
 
