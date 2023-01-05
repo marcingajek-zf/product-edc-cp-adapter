@@ -42,6 +42,14 @@ CREATE TABLE IF NOT EXISTS edc_cpadapter_queue
 CREATE UNIQUE INDEX IF NOT EXISTS edc_cpadapter_queue_id_uindex
     ON edc_cpadapter_queue (id);
 
+CREATE TABLE IF NOT EXISTS edc_cpadapter_object_store
+(
+    id                   VARCHAR NOT NULL,
+    created_at           BIGINT  NOT NULL,
+    type                 VARCHAR,
+    object               JSON,
+    PRIMARY KEY (id)
+);
 
 
 

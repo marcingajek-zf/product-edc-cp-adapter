@@ -24,7 +24,6 @@ import org.eclipse.edc.transaction.spi.TransactionContext;
 import org.eclipse.tractusx.edc.cp.adapter.dto.DataReferenceRetrievalDto;
 import org.eclipse.tractusx.edc.cp.adapter.store.model.QueueMessage;
 import org.eclipse.tractusx.edc.cp.adapter.store.schema.QueueStatements;
-import org.jetbrains.annotations.Nullable;
 
 import java.sql.Connection;
 import java.sql.ResultSet;
@@ -51,7 +50,6 @@ public class SqlQueueStore extends AbstractSqlStore {
         this.statements = statements;
         leaseContext = SqlLeaseContextBuilder.with(transactionContext, connectorId, statements, clock);
     }
-
 
     public void saveMessage(QueueMessage queueMessage) {
         long now = Instant.now().toEpochMilli();
@@ -148,20 +146,20 @@ public class SqlQueueStore extends AbstractSqlStore {
     }
 
     private void acquireLease(Connection connection, String id) {
-        leaseContext/*.by(leaseHolderName)*/.withConnection(connection).acquireLease(id);
+        leaseContext.withConnection(connection).acquireLease(id);
     }
 
     private void breakLease(Connection connection, String id) {
-        leaseContext/*.by(leaseHolderName)*/.withConnection(connection).breakLease(id);
+        leaseContext.withConnection(connection).breakLease(id);
     }
 
     private QueueMessage mapQueueMessage(ResultSet resultSet) throws SQLException {
         return QueueMessage.builder()
-            .id(resultSet.getString("id"))
-            .message(fromJson(resultSet.getString("message"), DataReferenceRetrievalDto.class))
-            .invokeAfter(resultSet.getLong("invoke_after"))
-            .createdAt(resultSet.getLong("created_at"))
-            .channel(resultSet.getString("channel"))
+            .id(resultSet.getString(statements.getIdColumn()))
+            .message(fromJson(resultSet.getString(statements.getMessageColumn()), DataReferenceRetrievalDto.class))
+            .invokeAfter(resultSet.getLong(statements.getInvokeAfterColumn()))
+            .createdAt(resultSet.getLong(statements.getCreatedAtColumn()))
+            .channel(resultSet.getString(statements.getChannelColumn()))
             .build();
     }
 }

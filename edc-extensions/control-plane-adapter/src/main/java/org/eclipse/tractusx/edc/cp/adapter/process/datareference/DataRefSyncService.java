@@ -24,7 +24,7 @@ import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectType;
 import org.eclipse.tractusx.edc.cp.adapter.util.LockMap;
 
 @RequiredArgsConstructor
-public class DataRefInMemorySyncService implements DataRefNotificationSyncService {
+public class DataRefSyncService implements DataRefNotificationSyncService {
   private final ObjectStoreService storeService;
   private final LockMap locks;
 

@@ -20,39 +20,39 @@ import org.eclipse.edc.sql.lease.LeaseStatements;
  * Defines all statements that are needed for the ContractDefinition store
  */
 public interface QueueStatements extends LeaseStatements {
-    default String getQueueTable() {
-        return "edc_cpadapter_queue";
-    }
+  default String getQueueTable() {
+    return "edc_cpadapter_queue";
+  }
 
-    default String getIdColumn() {
-        return "id";
-    }
+  default String getIdColumn() {
+    return "id";
+  }
 
-    default String getCreatedAtColumn() {
-        return "created_at";
-    }
+  default String getCreatedAtColumn() {
+    return "created_at";
+  }
 
-    default String getChannelColumn() {
-        return "channel";
-    }
+  default String getChannelColumn() {
+    return "channel";
+  }
 
-    default String getMessageColumn() {
-        return "message";
-    }
+  default String getMessageColumn() {
+    return "message";
+  }
 
-    default String getInvokeAfterColumn() {
-        return "invoke_after";
-    }
+  default String getInvokeAfterColumn() {
+    return "invoke_after";
+  }
 
-    String getAllMessagesTemplate();
+  String getAllMessagesTemplate();
 
-    String getMessagesToSendTemplate();
+  String getMessagesToSendTemplate();
 
-    String getSaveMessageTemplate();
+  String getSaveMessageTemplate();
 
-    String getDeleteTemplate();
+  String getDeleteTemplate();
 
-    String getFindByIdTemplate();
+  String getFindByIdTemplate();
 
-    String getUpdateTemplate();
+  String getUpdateTemplate();
 }

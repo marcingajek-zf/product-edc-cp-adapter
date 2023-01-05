@@ -18,7 +18,7 @@ import org.eclipse.edc.sql.dialect.BaseSqlDialect;
 
 import static java.lang.String.format;
 
-public class BaseSqlDialectStatements implements QueueStatements {
+public class BaseSqlDialectQueueStatements implements QueueStatements {
 
     @Override
     public String getSaveMessageTemplate() {

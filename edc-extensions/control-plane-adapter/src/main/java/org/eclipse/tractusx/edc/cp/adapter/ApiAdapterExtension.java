@@ -16,6 +16,7 @@ package org.eclipse.tractusx.edc.cp.adapter;
 
 import static java.util.Objects.nonNull;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.connector.api.management.configuration.ManagementApiConfiguration;
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationListener;
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationObservable;
@@ -38,7 +39,7 @@ import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.CatalogRe
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.ContractAgreementRetriever;
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.ContractNegotiationHandler;
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnotification.*;
-import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataRefInMemorySyncService;
+import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataRefSyncService;
 import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataRefNotificationSyncService;
 import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataReferenceHandler;
 import org.eclipse.tractusx.edc.cp.adapter.process.datareference.EndpointDataReferenceReceiverImpl;
@@ -46,8 +47,11 @@ import org.eclipse.tractusx.edc.cp.adapter.service.ErrorResultService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreServiceInMemory;
 import org.eclipse.tractusx.edc.cp.adapter.service.ResultService;
+import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreServiceSql;
+import org.eclipse.tractusx.edc.cp.adapter.store.SqlObjectStore;
 import org.eclipse.tractusx.edc.cp.adapter.store.SqlQueueStore;
-import org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres.PostgresDialectStatements;
+import org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres.PostgresDialectObjectStoreStatements;
+import org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres.PostgresDialectQueueStatements;
 import org.eclipse.tractusx.edc.cp.adapter.util.ExpiringMap;
 import org.eclipse.tractusx.edc.cp.adapter.util.LockMap;
 
@@ -81,14 +85,13 @@ public class ApiAdapterExtension implements ServiceExtension {
     ListenerService listenerService = new ListenerService();
 
     MessageBus messageBus = createMessageBus(listenerService, context, config);
-
-    ObjectStoreService storeService = new ObjectStoreServiceInMemory(context.getTypeManager().getMapper());
+    ObjectStoreService storeService = getStoreService(context, config);
 
     ResultService resultService = new ResultService(config.getDefaultSyncRequestTimeout(), monitor);
     ErrorResultService errorResultService = new ErrorResultService(monitor, messageBus);
 
     ContractNotificationSyncService contractSyncService =
-        new ContractInMemorySyncService(storeService, new LockMap());
+        new ContractSyncService(storeService, new LockMap());
 
     DataTransferInitializer dataTransferInitializer =
         new DataTransferInitializer(monitor, transferProcessService);
@@ -105,7 +108,7 @@ public class ApiAdapterExtension implements ServiceExtension {
         getContractNegotiationHandler(monitor, contractNegotiationService, messageBus);
 
     DataRefNotificationSyncService dataRefSyncService =
-        new DataRefInMemorySyncService(storeService, new LockMap());
+        new DataRefSyncService(storeService, new LockMap());
     DataReferenceHandler dataReferenceHandler =
         new DataReferenceHandler(monitor, messageBus, dataRefSyncService);
 
@@ -129,7 +132,7 @@ public class ApiAdapterExtension implements ServiceExtension {
     }
 
     SqlQueueStore sqlQueueStore = new SqlQueueStore(dataSourceRegistry, config.getDataSourceName(),
-        transactionContext, context.getTypeManager().getMapper(), new PostgresDialectStatements(), context.getConnectorId(),
+        transactionContext, context.getTypeManager().getMapper(), new PostgresDialectQueueStatements(), context.getConnectorId(),
         clock);
     SqlMessageBus messageBus = new SqlMessageBus(monitor, listenerService, sqlQueueStore,
         config.getSqlMessageBusThreadNumber(),
@@ -137,6 +140,24 @@ public class ApiAdapterExtension implements ServiceExtension {
     initMessageBus(messageBus, config);
 
     return messageBus;
+  }
+
+  private ObjectStoreService getStoreService(ServiceExtensionContext context, ApiAdapterConfig config) {
+    // TODO config SQL + default inmemory
+    if (false) {
+      return new ObjectStoreServiceInMemory(context.getTypeManager().getMapper());
+    }
+
+    ObjectMapper mapper = context.getTypeManager().getMapper();
+
+    SqlObjectStore objectStore = new SqlObjectStore(
+        dataSourceRegistry,
+        config.getDataSourceName(),
+        transactionContext,
+        mapper,
+        new PostgresDialectObjectStoreStatements());
+
+    return new ObjectStoreServiceSql(mapper, objectStore);
   }
 
   private void initMessageBus(SqlMessageBus messageBus, ApiAdapterConfig config) {
