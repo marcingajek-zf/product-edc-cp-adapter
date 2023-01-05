@@ -21,11 +21,11 @@ import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreServic
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectType;
 import org.eclipse.tractusx.edc.cp.adapter.util.LockMap;
 
-public class ContractInMemorySyncService implements ContractNotificationSyncService {
+public class ContractSyncService implements ContractNotificationSyncService {
   private final ObjectStoreService storeService;
   private final LockMap locks;
 
-  public ContractInMemorySyncService(ObjectStoreService storeService, LockMap locks) {
+  public ContractSyncService(ObjectStoreService storeService, LockMap locks) {
     this.storeService = storeService;
     this.locks = locks;
   }

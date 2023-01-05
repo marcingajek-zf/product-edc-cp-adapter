@@ -15,9 +15,9 @@
 package org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres;
 
 import org.eclipse.edc.sql.dialect.PostgresDialect;
-import org.eclipse.tractusx.edc.cp.adapter.store.schema.BaseSqlDialectStatements;
+import org.eclipse.tractusx.edc.cp.adapter.store.schema.BaseSqlDialectQueueStatements;
 
-public class PostgresDialectStatements extends BaseSqlDialectStatements {
+public class PostgresDialectQueueStatements extends BaseSqlDialectQueueStatements {
 
     /**
      * Overridable operator to convert strings to JSON. For postgres, this is the "::json" operator

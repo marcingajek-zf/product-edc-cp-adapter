@@ -1,0 +1,60 @@
+package org.eclipse.tractusx.edc.cp.adapter.service.objectstore;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.AllArgsConstructor;
+import org.eclipse.tractusx.edc.cp.adapter.store.SqlObjectStore;
+import org.eclipse.tractusx.edc.cp.adapter.store.model.ObjectEntity;
+
+import java.util.Objects;
+
+@AllArgsConstructor
+public class ObjectStoreServiceSql implements ObjectStoreService {
+  private final ObjectMapper mapper;
+  private final SqlObjectStore objectStore;
+
+  @Override
+  public void put(String key, ObjectType objectType, Object object) {
+    ObjectEntity entity = ObjectEntity.builder()
+        .id(key)
+        .type(objectType.name())
+        .object(objectToJson(object, objectType.name()))
+        .build();
+    objectStore.saveMessage(entity);
+  }
+
+  @Override
+  public <T> T get(String key, ObjectType objectType, Class<T> type) {
+    ObjectEntity entity = objectStore.find(key, objectType.name());
+    if (Objects.isNull(entity)) {
+      return null;
+    }
+    return jsonToObject(entity, type);
+  }
+
+  @Override
+  public void remove(String key, ObjectType objectType) {
+    objectStore.deleteMessage(key, objectType.name());
+  }
+
+  private String objectToJson(Object object, String type) {
+    if (Objects.isNull(object)) {
+      return null;
+    }
+    try {
+      return mapper.writeValueAsString(object);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException(String.format("Can not parse object of type %s", type));
+    }
+  }
+
+  private <T> T jsonToObject(ObjectEntity entity, Class<T> type) {
+    try {
+      return mapper.readValue(entity.getObject(), type);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
+      throw new IllegalArgumentException(String.format("Can not parse object of type %s", type));
+    }
+  }
+}
