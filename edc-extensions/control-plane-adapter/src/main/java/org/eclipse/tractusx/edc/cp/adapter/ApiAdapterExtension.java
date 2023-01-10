@@ -91,7 +91,7 @@ public class ApiAdapterExtension implements ServiceExtension {
             contractNegotiationService,
             dataTransferInitializer);
     ContractNegotiationHandler contractNegotiationHandler =
-        getContractNegotiationHandler(monitor, contractNegotiationService, messageBus);
+        getContractNegotiationHandler(monitor, contractNegotiationService, messageBus, config);
     DataRefNotificationSyncService dataRefSyncService =
         new DataRefInMemorySyncService(new LockMap());
     DataReferenceHandler dataReferenceHandler =
@@ -122,12 +122,15 @@ public class ApiAdapterExtension implements ServiceExtension {
   private ContractNegotiationHandler getContractNegotiationHandler(
       Monitor monitor,
       ContractNegotiationService contractNegotiationService,
-      InMemoryMessageBus messageBus) {
+      InMemoryMessageBus messageBus,
+      ApiAdapterConfig config) {
     return new ContractNegotiationHandler(
         monitor,
         messageBus,
         contractNegotiationService,
-        new CatalogCachedRetriever(new CatalogRetriever(catalogService), new ExpiringMap<>()),
+        new CatalogCachedRetriever(
+            new CatalogRetriever(config.getCatalogRequestLimit(), catalogService),
+            new ExpiringMap<>()),
         new ContractAgreementRetriever(monitor, agreementService));
   }
 

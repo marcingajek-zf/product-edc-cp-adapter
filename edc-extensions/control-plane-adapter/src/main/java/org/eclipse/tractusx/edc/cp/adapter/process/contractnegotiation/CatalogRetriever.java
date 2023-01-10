@@ -27,6 +27,7 @@ import org.eclipse.tractusx.edc.cp.adapter.exception.ExternalRequestException;
 
 @RequiredArgsConstructor
 public class CatalogRetriever {
+  private final int limit;
   private final CatalogService catalogService;
 
   public Catalog getEntireCatalog(String providerUrl) {
@@ -34,7 +35,6 @@ public class CatalogRetriever {
   }
 
   public Catalog getEntireCatalog(String providerUrl, String assetId) {
-    int limit = 50;
     int offset = 0;
 
     Catalog catalogResult = getCatalog(providerUrl, getQuerySpec(limit, offset, assetId));

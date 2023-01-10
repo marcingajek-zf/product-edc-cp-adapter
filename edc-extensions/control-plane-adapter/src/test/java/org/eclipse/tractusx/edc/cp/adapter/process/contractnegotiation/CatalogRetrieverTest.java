@@ -45,7 +45,7 @@ public class CatalogRetrieverTest {
   @Test
   public void getEntireCatalog_shouldReturnEntireCatalogIfMoreThanOnePage() {
     // given
-    CatalogRetriever catalogRetriever = new CatalogRetriever(catalogService);
+    CatalogRetriever catalogRetriever = new CatalogRetriever(50, catalogService);
     when(catalogService.getByProviderUrl(anyString(), any()))
         .thenReturn(getCatalogResult(50), getCatalogResult(50), getCatalogResult(10));
 
@@ -59,7 +59,7 @@ public class CatalogRetrieverTest {
   @Test
   public void getEntireCatalog_shouldEmptyCatalogIfNoResults() {
     // given
-    CatalogRetriever catalogRetriever = new CatalogRetriever(catalogService);
+    CatalogRetriever catalogRetriever = new CatalogRetriever(50, catalogService);
     when(catalogService.getByProviderUrl(anyString(), any())).thenReturn(getCatalogResult(0));
 
     // when

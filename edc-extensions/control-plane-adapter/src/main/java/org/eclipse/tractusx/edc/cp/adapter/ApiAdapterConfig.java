@@ -25,7 +25,8 @@ public class ApiAdapterConfig {
       "edc.cp.adapter.messagebus.inmemory.thread.number";
   private static final String CATALOG_EXPIRE_AFTER_TIME =
       "edc.cp.adapter.cache.catalog.expire.after";
-  private static final String REUSE_CONTRACT_AGREEMENT = "edc.cp.adapter.reuse.contract.agreement";
+  private static final String CATALOG_REQUEST_LIMIT = "edc.cp.adapter.catalog.request.limit";
+  private static final String CACHE_CONTRACT_AGREEMENT = "edc.cp.adapter.cache.contract.agreement";
 
   private final ServiceExtensionContext context;
 
@@ -45,11 +46,15 @@ public class ApiAdapterConfig {
     return context.getSetting(IN_MEMORY_MESSAGE_BUS_THREAD_NUMBER, 10);
   }
 
-  public boolean isContractAgreementReuseOn() {
-    return context.getSetting(REUSE_CONTRACT_AGREEMENT, 1) != 0;
+  public boolean isContractAgreementCacheOn() {
+    return context.getSetting(CACHE_CONTRACT_AGREEMENT, 1) != 0;
   }
 
   public int getCatalogExpireAfterTime() {
     return context.getSetting(CATALOG_EXPIRE_AFTER_TIME, 3600);
+  }
+
+  public int getCatalogRequestLimit() {
+    return context.getSetting(CATALOG_REQUEST_LIMIT, 100);
   }
 }
