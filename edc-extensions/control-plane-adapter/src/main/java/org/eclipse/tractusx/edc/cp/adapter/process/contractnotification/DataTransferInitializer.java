@@ -15,7 +15,7 @@ public class DataTransferInitializer {
   private final Monitor monitor;
   private final TransferProcessService transferProcessService;
 
-  public void initiate(DataReferenceRetrievalDto dto) {
+  public String initiate(DataReferenceRetrievalDto dto) {
     monitor.info(
         String.format(
             "[%s] ContractConfirmationHandler: transfer init - start.", dto.getTraceId()));
@@ -46,6 +46,8 @@ public class DataTransferInitializer {
     if (result.failed()) {
       throwDataRefRequestException(dto);
     }
+
+    return result.getContent();
   }
 
   private void throwDataRefRequestException(DataReferenceRetrievalDto dto) {

@@ -39,10 +39,7 @@ import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.CatalogRe
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.ContractAgreementRetriever;
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.ContractNegotiationHandler;
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnotification.*;
-import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataRefSyncService;
-import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataRefNotificationSyncService;
-import org.eclipse.tractusx.edc.cp.adapter.process.datareference.DataReferenceHandler;
-import org.eclipse.tractusx.edc.cp.adapter.process.datareference.EndpointDataReferenceReceiverImpl;
+import org.eclipse.tractusx.edc.cp.adapter.process.datareference.*;
 import org.eclipse.tractusx.edc.cp.adapter.service.ErrorResultService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreServiceInMemory;
@@ -118,10 +115,11 @@ public class ApiAdapterExtension implements ServiceExtension {
     listenerService.addListener(Channel.RESULT, resultService);
     listenerService.addListener(Channel.DLQ, errorResultService);
 
-    initHttpController(monitor, messageBus, resultService, config);
+    initHttpController(messageBus, resultService, config);
     initContractNegotiationListener(
-        monitor, negotiationObservable, messageBus, contractSyncService, dataTransferInitializer);
-    initDataReferenceReceiver(monitor, messageBus, dataRefSyncService);
+        negotiationObservable, messageBus, contractSyncService, dataTransferInitializer);
+    initDataReferenceReceiver(messageBus, dataRefSyncService);
+    initDataRefErrorHandler(messageBus, storeService, transferProcessService);
   }
 
   private MessageBus createMessageBus(ListenerService listenerService, ServiceExtensionContext context, ApiAdapterConfig config) {
@@ -169,7 +167,6 @@ public class ApiAdapterExtension implements ServiceExtension {
   }
 
   private void initHttpController(
-      Monitor monitor,
       MessageBus messageBus,
       ResultService resultService,
       ApiAdapterConfig config) {
@@ -191,7 +188,6 @@ public class ApiAdapterExtension implements ServiceExtension {
   }
 
   private void initDataReferenceReceiver(
-      Monitor monitor,
       MessageBus messageBus,
       DataRefNotificationSyncService dataRefSyncService) {
     EndpointDataReferenceReceiver dataReferenceReceiver =
@@ -200,7 +196,6 @@ public class ApiAdapterExtension implements ServiceExtension {
   }
 
   private void initContractNegotiationListener(
-      Monitor monitor,
       ContractNegotiationObservable negotiationObservable,
       MessageBus messageBus,
       ContractNotificationSyncService contractSyncService,
@@ -211,5 +206,22 @@ public class ApiAdapterExtension implements ServiceExtension {
     if (nonNull(negotiationObservable)) {
       negotiationObservable.registerListener(contractNegotiationListener);
     }
+  }
+
+  private void initDataRefErrorHandler(
+      MessageBus messageBus,
+      ObjectStoreService objectStore,
+      TransferProcessService transferProcessService) {
+
+    final int poolSize = 1;
+    final int initialDelay = 5;
+    final int interval = 5;
+    ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(poolSize);
+
+    DataReferenceErrorHandler errorHandler = new DataReferenceErrorHandler(
+        monitor, messageBus,objectStore, transferProcessService);
+
+    scheduler.scheduleAtFixedRate(errorHandler::validateActiveProcesses,
+        initialDelay, interval, TimeUnit.SECONDS);
   }
 }

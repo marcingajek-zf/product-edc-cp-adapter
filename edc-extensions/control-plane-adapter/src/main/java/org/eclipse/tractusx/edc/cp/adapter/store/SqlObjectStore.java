@@ -11,6 +11,8 @@ import org.eclipse.tractusx.edc.cp.adapter.store.schema.ObjectStoreStatements;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.eclipse.edc.sql.SqlQueryExecutor.executeQuery;
 import static org.eclipse.edc.sql.SqlQueryExecutor.executeQuerySingle;
@@ -45,6 +47,19 @@ public class SqlObjectStore extends AbstractSqlStore {
       try (var connection = getConnection()) {
         var sql = statements.getFindByIdAndTypeTemplate();
         return executeQuerySingle(connection, false, this::mapObjectEntity, sql, id, type);
+      } catch (SQLException e) {
+        e.printStackTrace();
+        throw new EdcPersistenceException(e);
+      }
+    });
+  }
+
+  public List<ObjectEntity> find(String type) {
+    return transactionContext.execute(() -> {
+      try (var connection = getConnection()) {
+        var sql = statements.getFindByTypeTemplate();
+        return executeQuery(connection, false, this::mapObjectEntity, sql, type)
+            .collect(Collectors.toList());
       } catch (SQLException e) {
         e.printStackTrace();
         throw new EdcPersistenceException(e);

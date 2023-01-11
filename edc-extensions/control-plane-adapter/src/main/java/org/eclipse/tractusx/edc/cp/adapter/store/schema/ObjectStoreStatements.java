@@ -25,5 +25,7 @@ public interface ObjectStoreStatements {
 
   String getFindByIdAndTypeTemplate();
 
+  String getFindByTypeTemplate();
+
   String getDeleteTemplate();
 }

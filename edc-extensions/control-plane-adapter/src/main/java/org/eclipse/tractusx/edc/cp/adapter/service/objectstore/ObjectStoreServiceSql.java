@@ -3,10 +3,13 @@ package org.eclipse.tractusx.edc.cp.adapter.service.objectstore;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import org.eclipse.edc.util.collection.CollectionUtil;
 import org.eclipse.tractusx.edc.cp.adapter.store.SqlObjectStore;
 import org.eclipse.tractusx.edc.cp.adapter.store.model.ObjectEntity;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class ObjectStoreServiceSql implements ObjectStoreService {
@@ -30,6 +33,17 @@ public class ObjectStoreServiceSql implements ObjectStoreService {
       return null;
     }
     return jsonToObject(entity, type);
+  }
+
+  @Override
+  public <T> List<T> get(ObjectType objectType, Class<T> type) {
+    List<ObjectEntity> entities = objectStore.find(objectType.name());
+    if (CollectionUtil.isEmpty(entities)) {
+      return List.of();
+    }
+    return entities.stream()
+        .map(entity -> jsonToObject(entity, type))
+        .collect(Collectors.toList());
   }
 
   @Override

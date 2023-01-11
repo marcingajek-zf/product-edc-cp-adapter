@@ -17,6 +17,11 @@ public class BaseSqlDialectObjectStoreStatements implements ObjectStoreStatement
   }
 
   @Override
+  public String getFindByTypeTemplate() {
+    return format("SELECT * FROM %s WHERE %s = ?", getObjectStoreTable(), getTypeColumn());
+  }
+
+  @Override
   public String getDeleteTemplate() {
     return format("DELETE FROM %s WHERE %s = ? AND %s = ?;", getObjectStoreTable(), getIdColumn(), getTypeColumn());
   }
