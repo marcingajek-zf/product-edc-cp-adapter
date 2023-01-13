@@ -38,9 +38,6 @@ import java.util.stream.Collectors;
 import static org.eclipse.edc.sql.SqlQueryExecutor.executeQuery;
 import static org.eclipse.edc.sql.SqlQueryExecutor.executeQuerySingle;
 
-/**
- * SQL-based implementation of the {@link ContractNegotiationStore}
- */
 public class SqlQueueStore extends AbstractSqlStore {
     private final QueueStatements statements;
     private final SqlLeaseContextBuilder leaseContext;
