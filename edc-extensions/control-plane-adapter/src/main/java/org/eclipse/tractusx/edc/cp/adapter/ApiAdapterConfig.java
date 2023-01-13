@@ -23,10 +23,8 @@ public class ApiAdapterConfig {
       "edc.cp.adapter.default.sync.request.timeout";
   private static final String CATALOG_EXPIRE_AFTER_TIME =
       "edc.cp.adapter.cache.catalog.expire.after";
-  private static final String REUSE_CONTRACT_AGREEMENT =
-      "edc.cp.adapter.reuse.contract.agreement";
-  private static final String CATALOG_REQUEST_LIMIT =
-      "edc.cp.adapter.catalog.request.limit";
+  private static final String REUSE_CONTRACT_AGREEMENT = "edc.cp.adapter.reuse.contract.agreement";
+  private static final String CATALOG_REQUEST_LIMIT = "edc.cp.adapter.catalog.request.limit";
 
   private static final String DATASOURCE_NAME = "edc.datasource.cpadapter.name";
   private static final String DATASOURCE_URL = "edc.datasource.cpadapter.url";

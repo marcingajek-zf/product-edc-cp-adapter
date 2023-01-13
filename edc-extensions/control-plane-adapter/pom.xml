@@ -122,7 +122,7 @@
         <dependency>
             <groupId>org.eclipse.edc</groupId>
             <artifactId>sql-lease</artifactId>
-            <version>0.0.1-20221201-SNAPSHOT</version> <!-- TODO why needs version -->
+            <version>${org.eclipse.edc.version}</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.edc</groupId>
