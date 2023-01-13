@@ -66,6 +66,30 @@ public class HttpControllerTest {
   }
 
   @Test
+  public void getAssetSynchronous_shouldReturnErrorStatusIfOccurred() throws InterruptedException {
+    // given
+    Monitor monitor = Mockito.mock(Monitor.class);
+    ResultService resultService = Mockito.mock(ResultService.class);
+    MessageBus messageBus = Mockito.mock(MessageBus.class);
+    ApiAdapterConfig config = Mockito.mock(ApiAdapterConfig.class);
+    when(config.getDefaultMessageRetryNumber()).thenReturn(RETRY_NUMBER);
+    HttpController httpController = new HttpController(monitor, resultService, messageBus, config);
+
+    when(resultService.pull(anyString()))
+        .thenReturn(
+            ProcessData.builder()
+                .errorStatus(Response.Status.BAD_GATEWAY)
+                .endpointDataReference(getEndpointDataReference())
+                .build());
+
+    // when
+    Response response = httpController.getAssetSynchronous("assetId", "providerUrl", null, null, null);
+
+    // then
+    assertEquals(Response.Status.BAD_GATEWAY.getStatusCode(), response.getStatus());
+  }
+
+  @Test
   public void getAssetSynchronous_shouldReturnOkResponse() throws InterruptedException {
     // given
     Monitor monitor = Mockito.mock(Monitor.class);

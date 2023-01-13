@@ -53,6 +53,7 @@ import org.eclipse.tractusx.edc.cp.adapter.util.ExpiringMap;
 import org.eclipse.tractusx.edc.cp.adapter.util.LockMap;
 
 import java.time.Clock;
+import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -123,8 +124,8 @@ public class ApiAdapterExtension implements ServiceExtension {
   }
 
   private MessageBus createMessageBus(ListenerService listenerService, ServiceExtensionContext context, ApiAdapterConfig config) {
-    // TODO config SQL + default inmemory
-    if (false) {
+    if (!isPersistenceConfigured(config)) {
+      monitor.info("Persistent layer configuration is missing. Starting MessageBus in 'IN MEMORY' mode.");
       return new InMemoryMessageBus(
             monitor, listenerService, config.getInMemoryMessageBusThreadNumber());
     }
@@ -136,25 +137,22 @@ public class ApiAdapterExtension implements ServiceExtension {
         config.getSqlMessageBusThreadNumber(),
         config.getSqlMessageBusMaxDelivery());
     initMessageBus(messageBus, config);
-
     return messageBus;
   }
 
   private ObjectStoreService getStoreService(ServiceExtensionContext context, ApiAdapterConfig config) {
-    // TODO config SQL + default inmemory
-    if (false) {
+    if (!isPersistenceConfigured(config)) {
+      monitor.info("Persistent layer configuration is missing. Starting ObjectStore in 'IN MEMORY' mode.");
       return new ObjectStoreServiceInMemory(context.getTypeManager().getMapper());
     }
 
     ObjectMapper mapper = context.getTypeManager().getMapper();
-
     SqlObjectStore objectStore = new SqlObjectStore(
         dataSourceRegistry,
         config.getDataSourceName(),
         transactionContext,
         mapper,
         new PostgresDialectObjectStoreStatements());
-
     return new ObjectStoreServiceSql(mapper, objectStore);
   }
 
@@ -226,5 +224,12 @@ public class ApiAdapterExtension implements ServiceExtension {
 
     scheduler.scheduleAtFixedRate(errorHandler::validateActiveProcesses,
         initialDelay, interval, TimeUnit.SECONDS);
+  }
+
+  private boolean isPersistenceConfigured(ApiAdapterConfig config) {
+    return Objects.nonNull(config.getDataSourceName()) &&
+        Objects.nonNull(config.getDataSourceUrl()) &&
+        Objects.nonNull(config.getDataSourceUser()) &&
+        Objects.nonNull(config.getDataSourcePass());
   }
 }

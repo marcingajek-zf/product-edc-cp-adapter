@@ -27,12 +27,18 @@ public class ApiAdapterConfig {
       "edc.cp.adapter.reuse.contract.agreement";
   private static final String CATALOG_REQUEST_LIMIT =
       "edc.cp.adapter.catalog.request.limit";
+
   private static final String DATASOURCE_NAME =
       "edc.datasource.cpadapter.name";
+  private static final String DATASOURCE_URL =
+      "edc.datasource.cpadapter.url";
+  private static final String DATASOURCE_USER =
+      "edc.datasource.cpadapter.user";
+  private static final String DATASOURCE_PASS =
+      "edc.datasource.cpadapter.password";
 
   private static final String IN_MEMORY_MESSAGE_BUS_THREAD_NUMBER =
       "edc.cp.adapter.messagebus.inmemory.thread.number";
-
   private static final String SQL_MESSAGE_BUS_THREAD_NUMBER =
       "edc.cp.adapter.messagebus.sql.thread.number";
   private static final String SQL_MESSAGE_BUS_MAX_DELIVERY =
@@ -73,6 +79,18 @@ public class ApiAdapterConfig {
 
   public String getDataSourceName() {
     return context.getSetting(DATASOURCE_NAME, "cpadapter");
+  }
+
+  public String getDataSourceUrl() {
+    return context.getSetting(DATASOURCE_URL, null);
+  }
+
+  public String getDataSourceUser() {
+    return context.getSetting(DATASOURCE_USER, null);
+  }
+
+  public String getDataSourcePass() {
+    return context.getSetting(DATASOURCE_PASS, null);
   }
 
   public int getSqlMessageBusThreadNumber() {
