@@ -58,11 +58,11 @@ public class SqlMessageBusTest {
 
     // when
     messageBus.send(Channel.INITIAL, message);
-    Thread.sleep(50);
+    Thread.sleep(60);
     messageBus.deliverMessages(10);
 
     // then
-    Thread.sleep(50);
+    Thread.sleep(60);
     verify(listener, times(1)).process(any(DataReferenceRetrievalDto.class));
   }
 
@@ -78,6 +78,7 @@ public class SqlMessageBusTest {
     // when
     messageBus.send(Channel.INITIAL, message);
     messageBus.deliverMessages(10);
+    Thread.sleep(60);
 
     // then
     verify(listener, times(2)).process(any(DataReferenceRetrievalDto.class));
@@ -95,7 +96,7 @@ public class SqlMessageBusTest {
 
     // when
     messageBus.send(Channel.INITIAL, message);
-    Thread.sleep(50);
+    Thread.sleep(60);
 
     // then
     verify(listenerService).getListener(eq(Channel.DLQ));
