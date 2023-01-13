@@ -14,6 +14,10 @@
 
 package org.eclipse.tractusx.edc.cp.adapter.process.datareference;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.eclipse.edc.connector.spi.transferprocess.TransferProcessService;
 import org.eclipse.edc.connector.transfer.spi.types.TransferProcessStates;
@@ -31,16 +35,11 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
-
 public class DataReferenceErrorHandlerTest {
   @Mock Monitor monitor;
   @Mock MessageBus messageBus;
   @Mock TransferProcessService transferProcessService;
   ObjectStoreService storeService = new ObjectStoreServiceInMemory(new ObjectMapper());
-
 
   @BeforeEach
   void init() {
@@ -52,9 +51,10 @@ public class DataReferenceErrorHandlerTest {
   @Test
   public void validateActiveProcesses_shouldSkipIfNoError() {
     // given
-    when(transferProcessService.getState("transferId")).thenReturn(TransferProcessStates.COMPLETED.name());
-    DataReferenceErrorHandler errorHandler = new DataReferenceErrorHandler(
-        monitor, messageBus, storeService, transferProcessService);
+    when(transferProcessService.getState("transferId"))
+        .thenReturn(TransferProcessStates.COMPLETED.name());
+    DataReferenceErrorHandler errorHandler =
+        new DataReferenceErrorHandler(monitor, messageBus, storeService, transferProcessService);
 
     // when
     errorHandler.validateActiveProcesses();
@@ -69,8 +69,8 @@ public class DataReferenceErrorHandlerTest {
     when(transferProcessService.getState("transferId"))
         .thenReturn(TransferProcessStates.COMPLETED.name())
         .thenReturn(TransferProcessStates.ERROR.name());
-    DataReferenceErrorHandler errorHandler = new DataReferenceErrorHandler(
-        monitor, messageBus, storeService, transferProcessService);
+    DataReferenceErrorHandler errorHandler =
+        new DataReferenceErrorHandler(monitor, messageBus, storeService, transferProcessService);
 
     // when
     errorHandler.validateActiveProcesses();
@@ -85,8 +85,8 @@ public class DataReferenceErrorHandlerTest {
     when(transferProcessService.getState("transferId"))
         .thenReturn(TransferProcessStates.COMPLETED.name())
         .thenReturn(TransferProcessStates.CANCELLED.name());
-    DataReferenceErrorHandler errorHandler = new DataReferenceErrorHandler(
-        monitor, messageBus, storeService, transferProcessService);
+    DataReferenceErrorHandler errorHandler =
+        new DataReferenceErrorHandler(monitor, messageBus, storeService, transferProcessService);
 
     // when
     errorHandler.validateActiveProcesses();
@@ -94,7 +94,6 @@ public class DataReferenceErrorHandlerTest {
     // then
     verify(messageBus, times(1)).send(eq(Channel.RESULT), any(Message.class));
   }
-
 
   private DataReferenceRetrievalDto getDto() {
     return new DataReferenceRetrievalDto(getProcessData(), 3);

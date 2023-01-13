@@ -135,8 +135,7 @@ public class ContractNegotiationHandler implements Listener<DataReferenceRetriev
   }
 
   private String getAgreementNotFoundMessage(DataReferenceRetrievalDto dto) {
-    return "Not found the contract agreement with ID: "
-        + dto.getPayload().getContractAgreementId();
+    return "Not found the contract agreement with ID: " + dto.getPayload().getContractAgreementId();
   }
 
   private String getContractNotFoundMessage(DataReferenceRetrievalDto dto) {

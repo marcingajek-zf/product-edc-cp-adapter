@@ -14,16 +14,15 @@
 
 package org.eclipse.tractusx.edc.cp.adapter.messaging;
 
-import org.eclipse.edc.spi.monitor.Monitor;
-import org.eclipse.tractusx.edc.cp.adapter.store.SqlQueueStore;
-import org.eclipse.tractusx.edc.cp.adapter.store.model.QueueMessage;
+import static java.util.Objects.isNull;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-
-import static java.util.Objects.isNull;
+import org.eclipse.edc.spi.monitor.Monitor;
+import org.eclipse.tractusx.edc.cp.adapter.store.SqlQueueStore;
+import org.eclipse.tractusx.edc.cp.adapter.store.model.QueueMessage;
 
 public class SqlMessageBus implements MessageBus {
   private final int maxDelivery;
@@ -32,13 +31,17 @@ public class SqlMessageBus implements MessageBus {
   private final ScheduledExecutorService executorService;
   private final SqlQueueStore store;
 
-  public SqlMessageBus(Monitor monitor, ListenerService listenerService, SqlQueueStore sqlQueueStore, int threadPoolSize, int maxDelivery) {
+  public SqlMessageBus(
+      Monitor monitor,
+      ListenerService listenerService,
+      SqlQueueStore sqlQueueStore,
+      int threadPoolSize,
+      int maxDelivery) {
     this.monitor = monitor;
     this.listenerService = listenerService;
     this.store = sqlQueueStore;
     this.maxDelivery = maxDelivery;
     this.executorService = Executors.newScheduledThreadPool(threadPoolSize);
-
   }
 
   @Override
@@ -46,13 +49,11 @@ public class SqlMessageBus implements MessageBus {
     if (isNull(message)) {
       monitor.warning(String.format("Message is empty, channel: %s", channel));
     } else {
-      monitor.info(String.format("[%s] Message sent to channel: %s", message.getTraceId(), channel));
+      monitor.info(
+          String.format("[%s] Message sent to channel: %s", message.getTraceId(), channel));
       long now = Instant.now().toEpochMilli();
-      store.saveMessage(QueueMessage.builder()
-          .channel(channel.name())
-          .message(message)
-          .invokeAfter(now)
-          .build());
+      store.saveMessage(
+          QueueMessage.builder().channel(channel.name()).message(message).invokeAfter(now).build());
 
       deliverMessages(maxDelivery);
     }
@@ -61,7 +62,8 @@ public class SqlMessageBus implements MessageBus {
   public void deliverMessages(int maxElements) {
     List<QueueMessage> queueMessages = store.findMessagesToSend(maxElements);
     monitor.debug("Found " + queueMessages.size() + " messages to send.");
-    queueMessages.forEach(queueMessage -> executorService.submit(() -> deliverMessage(queueMessage)));
+    queueMessages.forEach(
+        queueMessage -> executorService.submit(() -> deliverMessage(queueMessage)));
   }
 
   private void deliverMessage(QueueMessage queueMessage) {

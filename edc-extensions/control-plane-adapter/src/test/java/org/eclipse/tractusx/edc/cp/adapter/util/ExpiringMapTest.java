@@ -17,7 +17,6 @@ package org.eclipse.tractusx.edc.cp.adapter.util;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-
 public class ExpiringMapTest {
 
   private static final String KEY = "key";

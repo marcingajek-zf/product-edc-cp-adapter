@@ -21,7 +21,6 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
 import lombok.RequiredArgsConstructor;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.util.string.StringUtils;
@@ -59,9 +58,10 @@ public class HttpController {
         initiateProcess(assetId, providerUrl, contractAgreementId, contractAgreementReuse);
 
     try {
-      ProcessData processData = StringUtils.isNullOrEmpty(timeout) || !isNumeric(timeout)
-          ? resultService.pull(traceId)
-          : resultService.pull(traceId, Long.parseLong(timeout), TimeUnit.SECONDS);
+      ProcessData processData =
+          StringUtils.isNullOrEmpty(timeout) || !isNumeric(timeout)
+              ? resultService.pull(traceId)
+              : resultService.pull(traceId, Long.parseLong(timeout), TimeUnit.SECONDS);
 
       if (Objects.isNull(processData)) {
         return notFoundResponse();

@@ -35,13 +35,12 @@ public class ContractSyncService implements ContractNotificationSyncService {
       String negotiationId, String agreementId) {
     locks.lock(negotiationId);
 
-    DataReferenceRetrievalDto dto = storeService.get(
-        negotiationId,
-        ObjectType.DTO,
-        DataReferenceRetrievalDto.class);
+    DataReferenceRetrievalDto dto =
+        storeService.get(negotiationId, ObjectType.DTO, DataReferenceRetrievalDto.class);
 
     if (isNull(dto)) {
-      ContractInfo contractInfo = new ContractInfo(agreementId, ContractInfo.ContractState.CONFIRMED);
+      ContractInfo contractInfo =
+          new ContractInfo(agreementId, ContractInfo.ContractState.CONFIRMED);
       storeService.put(negotiationId, ObjectType.CONTRACT_INFO, contractInfo);
     }
     locks.unlock(negotiationId);
@@ -52,10 +51,8 @@ public class ContractSyncService implements ContractNotificationSyncService {
   public DataReferenceRetrievalDto exchangeDeclinedContract(String negotiationId) {
     locks.lock(negotiationId);
 
-    DataReferenceRetrievalDto dto = storeService.get(
-        negotiationId,
-        ObjectType.DTO,
-        DataReferenceRetrievalDto.class);
+    DataReferenceRetrievalDto dto =
+        storeService.get(negotiationId, ObjectType.DTO, DataReferenceRetrievalDto.class);
 
     if (isNull(dto)) {
       ContractInfo contractInfo = new ContractInfo(ContractInfo.ContractState.DECLINED);
@@ -69,10 +66,8 @@ public class ContractSyncService implements ContractNotificationSyncService {
   public DataReferenceRetrievalDto exchangeErrorContract(String negotiationId) {
     locks.lock(negotiationId);
 
-    DataReferenceRetrievalDto dto = storeService.get(
-        negotiationId,
-        ObjectType.DTO,
-        DataReferenceRetrievalDto.class);
+    DataReferenceRetrievalDto dto =
+        storeService.get(negotiationId, ObjectType.DTO, DataReferenceRetrievalDto.class);
 
     if (isNull(dto)) {
       ContractInfo contractInfo = new ContractInfo(ContractInfo.ContractState.ERROR);
@@ -88,10 +83,8 @@ public class ContractSyncService implements ContractNotificationSyncService {
     String negotiationId = dto.getPayload().getContractNegotiationId();
     locks.lock(negotiationId);
 
-    ContractInfo contractInfo = storeService.get(
-        negotiationId,
-        ObjectType.CONTRACT_INFO,
-        ContractInfo.class);
+    ContractInfo contractInfo =
+        storeService.get(negotiationId, ObjectType.CONTRACT_INFO, ContractInfo.class);
 
     if (isNull(contractInfo)) {
       storeService.put(negotiationId, ObjectType.DTO, dto);

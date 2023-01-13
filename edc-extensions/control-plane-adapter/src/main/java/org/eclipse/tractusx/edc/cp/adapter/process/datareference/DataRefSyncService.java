@@ -31,10 +31,8 @@ public class DataRefSyncService implements DataRefNotificationSyncService {
   public EndpointDataReference exchangeDto(DataReferenceRetrievalDto dto, String agreementId) {
     locks.lock(agreementId);
 
-    EndpointDataReference dataReference = storeService.get(
-        agreementId,
-        ObjectType.DATA_REFERENCE,
-        EndpointDataReference.class);
+    EndpointDataReference dataReference =
+        storeService.get(agreementId, ObjectType.DATA_REFERENCE, EndpointDataReference.class);
 
     if (isNull(dataReference)) {
       storeService.put(agreementId, ObjectType.DTO, dto);
@@ -48,10 +46,8 @@ public class DataRefSyncService implements DataRefNotificationSyncService {
       EndpointDataReference dataReference, String agreementId) {
     locks.lock(agreementId);
 
-    DataReferenceRetrievalDto dto =  storeService.get(
-        agreementId,
-        ObjectType.DTO,
-        DataReferenceRetrievalDto.class);
+    DataReferenceRetrievalDto dto =
+        storeService.get(agreementId, ObjectType.DTO, DataReferenceRetrievalDto.class);
 
     if (isNull(dto)) {
       storeService.put(agreementId, ObjectType.DATA_REFERENCE, dataReference);

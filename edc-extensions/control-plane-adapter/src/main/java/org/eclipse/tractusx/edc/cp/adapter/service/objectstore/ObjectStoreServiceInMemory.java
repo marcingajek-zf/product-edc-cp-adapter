@@ -16,13 +16,12 @@ package org.eclipse.tractusx.edc.cp.adapter.service.objectstore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.AllArgsConstructor;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 public class ObjectStoreServiceInMemory implements ObjectStoreService {
@@ -42,9 +41,7 @@ public class ObjectStoreServiceInMemory implements ObjectStoreService {
   @Override
   public <T> T get(String key, ObjectType objectType, Class<T> type) {
     String json = map.get(getKey(key, objectType));
-    return Objects.isNull(json)
-      ? null
-      : map(type, json);
+    return Objects.isNull(json) ? null : map(type, json);
   }
 
   @Override

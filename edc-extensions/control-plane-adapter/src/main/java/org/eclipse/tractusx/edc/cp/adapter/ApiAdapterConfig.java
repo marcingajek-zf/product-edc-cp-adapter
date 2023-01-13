@@ -23,17 +23,12 @@ public class ApiAdapterConfig {
       "edc.cp.adapter.default.sync.request.timeout";
   private static final String CATALOG_EXPIRE_AFTER_TIME =
       "edc.cp.adapter.cache.catalog.expire.after";
-  private static final String REUSE_CONTRACT_AGREEMENT =
-      "edc.cp.adapter.reuse.contract.agreement";
+  private static final String REUSE_CONTRACT_AGREEMENT = "edc.cp.adapter.reuse.contract.agreement";
 
-  private static final String DATASOURCE_NAME =
-      "edc.datasource.cpadapter.name";
-  private static final String DATASOURCE_URL =
-      "edc.datasource.cpadapter.url";
-  private static final String DATASOURCE_USER =
-      "edc.datasource.cpadapter.user";
-  private static final String DATASOURCE_PASS =
-      "edc.datasource.cpadapter.password";
+  private static final String DATASOURCE_NAME = "edc.datasource.cpadapter.name";
+  private static final String DATASOURCE_URL = "edc.datasource.cpadapter.url";
+  private static final String DATASOURCE_USER = "edc.datasource.cpadapter.user";
+  private static final String DATASOURCE_PASS = "edc.datasource.cpadapter.password";
 
   private static final String IN_MEMORY_MESSAGE_BUS_THREAD_NUMBER =
       "edc.cp.adapter.messagebus.inmemory.thread.number";
@@ -43,7 +38,6 @@ public class ApiAdapterConfig {
       "edc.cp.adapter.messagebus.sql.max.delivery";
   private static final String SQL_MESSAGE_BUS_DELIVERY_INTERVAL =
       "edc.cp.adapter.messagebus.sql.max.delivery";
-
 
   private final ServiceExtensionContext context;
 

@@ -27,11 +27,13 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeConfirmedContract_shouldReturnDtoIfAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
     syncService.exchangeDto(getDataReferenceRetrievalDto());
 
     // when
-    DataReferenceRetrievalDto dto = syncService.exchangeConfirmedContract("negotiationId", "agreementId");
+    DataReferenceRetrievalDto dto =
+        syncService.exchangeConfirmedContract("negotiationId", "agreementId");
 
     // then
     Assertions.assertNotNull(dto);
@@ -40,10 +42,12 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeConfirmedContract_shouldReturnNullIfDtoNotAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
 
     // when
-    DataReferenceRetrievalDto dto = syncService.exchangeConfirmedContract("negotiationId", "agreementId");
+    DataReferenceRetrievalDto dto =
+        syncService.exchangeConfirmedContract("negotiationId", "agreementId");
 
     // then
     Assertions.assertNull(dto);
@@ -52,7 +56,8 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeDeclinedContract_shouldReturnDtoIfAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
     syncService.exchangeDto(getDataReferenceRetrievalDto());
 
     // when
@@ -65,7 +70,8 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeDeclinedContract_shouldReturnNullIfDtoNotAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
 
     // when
     DataReferenceRetrievalDto dto = syncService.exchangeDeclinedContract("negotiationId");
@@ -77,7 +83,8 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeErrorContract_shouldReturnDtoIfAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
     syncService.exchangeDto(getDataReferenceRetrievalDto());
 
     // when
@@ -90,7 +97,8 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeErrorContract_shouldReturnNullIfDtoNotAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
 
     // when
     DataReferenceRetrievalDto dto = syncService.exchangeErrorContract("negotiationId");
@@ -102,7 +110,8 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeDto_shouldReturnContractInfoIfAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
     syncService.exchangeConfirmedContract("negotiationId", "agreementId");
 
     // when
@@ -115,7 +124,8 @@ public class ContractSyncServiceTest {
   @Test
   public void exchangeDto_shouldReturnNullIfContractInfoNotAvailable() {
     // given
-    ContractSyncService syncService = new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    ContractSyncService syncService =
+        new ContractSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
 
     // when
     ContractInfo contractInfo = syncService.exchangeDto(getDataReferenceRetrievalDto());
@@ -124,12 +134,8 @@ public class ContractSyncServiceTest {
     Assertions.assertNull(contractInfo);
   }
 
-
   private DataReferenceRetrievalDto getDataReferenceRetrievalDto() {
-    ProcessData processData = ProcessData.builder()
-        .assetId("assetId")
-        .provider("provider")
-        .build();
+    ProcessData processData = ProcessData.builder().assetId("assetId").provider("provider").build();
     DataReferenceRetrievalDto dto = new DataReferenceRetrievalDto(processData, 3);
     dto.getPayload().setContractNegotiationId("negotiationId");
     return dto;

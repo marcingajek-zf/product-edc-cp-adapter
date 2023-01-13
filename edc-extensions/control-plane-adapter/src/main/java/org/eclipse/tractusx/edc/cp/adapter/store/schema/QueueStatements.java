@@ -16,9 +16,7 @@ package org.eclipse.tractusx.edc.cp.adapter.store.schema;
 
 import org.eclipse.edc.sql.lease.LeaseStatements;
 
-/**
- * Defines all statements that are needed for the ContractDefinition store
- */
+/** Defines all statements that are needed for the ContractDefinition store */
 public interface QueueStatements extends LeaseStatements {
   default String getQueueTable() {
     return "edc_cpadapter_queue";

@@ -19,11 +19,11 @@ import org.eclipse.tractusx.edc.cp.adapter.store.schema.BaseSqlDialectQueueState
 
 public class PostgresDialectQueueStatements extends BaseSqlDialectQueueStatements {
 
-    /**
-     * Overridable operator to convert strings to JSON. For postgres, this is the "::json" operator
-     */
-    @Override
-    protected String getFormatJsonOperator() {
-        return PostgresDialect.getJsonCastOperator();
-    }
+  /**
+   * Overridable operator to convert strings to JSON. For postgres, this is the "::json" operator
+   */
+  @Override
+  protected String getFormatJsonOperator() {
+    return PostgresDialect.getJsonCastOperator();
+  }
 }
