@@ -26,50 +26,58 @@ import org.junit.jupiter.api.Test;
 public class DataRefSyncServiceTest {
 
   @Test
-  public void exchangeDto_shouldReturnDataReferenceIfAvailable(){
+  public void exchangeDto_shouldReturnDataReferenceIfAvailable() {
     // given
-    DataRefSyncService syncService = new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    DataRefSyncService syncService =
+        new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
     syncService.exchangeDataReference(getEndpointDataReference(), "agreementId");
 
     // when
-    EndpointDataReference dataReference = syncService.exchangeDto(getDataReferenceRetrievalDto(), "agreementId");
+    EndpointDataReference dataReference =
+        syncService.exchangeDto(getDataReferenceRetrievalDto(), "agreementId");
 
     // then
     Assertions.assertNotNull(dataReference);
   }
 
   @Test
-  public void exchangeDto_shouldReturnNullIfDataReferenceNotAvailable(){
+  public void exchangeDto_shouldReturnNullIfDataReferenceNotAvailable() {
     // given
-    DataRefSyncService syncService = new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    DataRefSyncService syncService =
+        new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
 
     // when
-    EndpointDataReference dataReference = syncService.exchangeDto(getDataReferenceRetrievalDto(), "agreementId");
+    EndpointDataReference dataReference =
+        syncService.exchangeDto(getDataReferenceRetrievalDto(), "agreementId");
 
     // then
     Assertions.assertNull(dataReference);
   }
 
   @Test
-  public void exchangeDataReference_shouldReturnDtoIfAvailable(){
+  public void exchangeDataReference_shouldReturnDtoIfAvailable() {
     // given
-    DataRefSyncService syncService = new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    DataRefSyncService syncService =
+        new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
     syncService.exchangeDto(getDataReferenceRetrievalDto(), "agreementId");
 
     // when
-    DataReferenceRetrievalDto dto = syncService.exchangeDataReference(getEndpointDataReference(), "agreementId");
+    DataReferenceRetrievalDto dto =
+        syncService.exchangeDataReference(getEndpointDataReference(), "agreementId");
 
     // then
     Assertions.assertNotNull(dto);
   }
 
   @Test
-  public void exchangeDataReference_shouldReturnNullIfDtoNotAvailable(){
+  public void exchangeDataReference_shouldReturnNullIfDtoNotAvailable() {
     // given
-    DataRefSyncService syncService = new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
+    DataRefSyncService syncService =
+        new DataRefSyncService(new ObjectStoreServiceInMemory(new ObjectMapper()), new LockMap());
 
     // when
-    DataReferenceRetrievalDto dto = syncService.exchangeDataReference(getEndpointDataReference(), "agreementId");
+    DataReferenceRetrievalDto dto =
+        syncService.exchangeDataReference(getEndpointDataReference(), "agreementId");
 
     // then
     Assertions.assertNull(dto);
@@ -84,10 +92,7 @@ public class DataRefSyncServiceTest {
   }
 
   private DataReferenceRetrievalDto getDataReferenceRetrievalDto() {
-    ProcessData processData = ProcessData.builder()
-        .assetId("assetId")
-        .provider("provider")
-        .build();
+    ProcessData processData = ProcessData.builder().assetId("assetId").provider("provider").build();
     return new DataReferenceRetrievalDto(processData, 3);
   }
 }

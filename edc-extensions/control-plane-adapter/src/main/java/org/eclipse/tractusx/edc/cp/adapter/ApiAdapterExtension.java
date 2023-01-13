@@ -17,6 +17,11 @@ package org.eclipse.tractusx.edc.cp.adapter;
 import static java.util.Objects.nonNull;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
+import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.eclipse.edc.connector.api.management.configuration.ManagementApiConfiguration;
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationListener;
 import org.eclipse.edc.connector.contract.spi.negotiation.observe.ContractNegotiationObservable;
@@ -41,9 +46,9 @@ import org.eclipse.tractusx.edc.cp.adapter.process.contractnegotiation.ContractN
 import org.eclipse.tractusx.edc.cp.adapter.process.contractnotification.*;
 import org.eclipse.tractusx.edc.cp.adapter.process.datareference.*;
 import org.eclipse.tractusx.edc.cp.adapter.service.ErrorResultService;
+import org.eclipse.tractusx.edc.cp.adapter.service.ResultService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreServiceInMemory;
-import org.eclipse.tractusx.edc.cp.adapter.service.ResultService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreServiceSql;
 import org.eclipse.tractusx.edc.cp.adapter.store.SqlObjectStore;
 import org.eclipse.tractusx.edc.cp.adapter.store.SqlQueueStore;
@@ -51,12 +56,6 @@ import org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres.PostgresDialect
 import org.eclipse.tractusx.edc.cp.adapter.store.schema.postgres.PostgresDialectQueueStatements;
 import org.eclipse.tractusx.edc.cp.adapter.util.ExpiringMap;
 import org.eclipse.tractusx.edc.cp.adapter.util.LockMap;
-
-import java.time.Clock;
-import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 public class ApiAdapterExtension implements ServiceExtension {
   @Inject private Monitor monitor;
@@ -123,36 +122,51 @@ public class ApiAdapterExtension implements ServiceExtension {
     initDataRefErrorHandler(messageBus, storeService, transferProcessService);
   }
 
-  private MessageBus createMessageBus(ListenerService listenerService, ServiceExtensionContext context, ApiAdapterConfig config) {
+  private MessageBus createMessageBus(
+      ListenerService listenerService, ServiceExtensionContext context, ApiAdapterConfig config) {
     if (!isPersistenceConfigured(config)) {
-      monitor.info("Persistent layer configuration is missing. Starting MessageBus in 'IN MEMORY' mode.");
+      monitor.info(
+          "Persistent layer configuration is missing. Starting MessageBus in 'IN MEMORY' mode.");
       return new InMemoryMessageBus(
-            monitor, listenerService, config.getInMemoryMessageBusThreadNumber());
+          monitor, listenerService, config.getInMemoryMessageBusThreadNumber());
     }
 
-    SqlQueueStore sqlQueueStore = new SqlQueueStore(dataSourceRegistry, config.getDataSourceName(),
-        transactionContext, context.getTypeManager().getMapper(), new PostgresDialectQueueStatements(), context.getConnectorId(),
-        clock);
-    SqlMessageBus messageBus = new SqlMessageBus(monitor, listenerService, sqlQueueStore,
-        config.getSqlMessageBusThreadNumber(),
-        config.getSqlMessageBusMaxDelivery());
+    SqlQueueStore sqlQueueStore =
+        new SqlQueueStore(
+            dataSourceRegistry,
+            config.getDataSourceName(),
+            transactionContext,
+            context.getTypeManager().getMapper(),
+            new PostgresDialectQueueStatements(),
+            context.getConnectorId(),
+            clock);
+    SqlMessageBus messageBus =
+        new SqlMessageBus(
+            monitor,
+            listenerService,
+            sqlQueueStore,
+            config.getSqlMessageBusThreadNumber(),
+            config.getSqlMessageBusMaxDelivery());
     initMessageBus(messageBus, config);
     return messageBus;
   }
 
-  private ObjectStoreService getStoreService(ServiceExtensionContext context, ApiAdapterConfig config) {
+  private ObjectStoreService getStoreService(
+      ServiceExtensionContext context, ApiAdapterConfig config) {
     if (!isPersistenceConfigured(config)) {
-      monitor.info("Persistent layer configuration is missing. Starting ObjectStore in 'IN MEMORY' mode.");
+      monitor.info(
+          "Persistent layer configuration is missing. Starting ObjectStore in 'IN MEMORY' mode.");
       return new ObjectStoreServiceInMemory(context.getTypeManager().getMapper());
     }
 
     ObjectMapper mapper = context.getTypeManager().getMapper();
-    SqlObjectStore objectStore = new SqlObjectStore(
-        dataSourceRegistry,
-        config.getDataSourceName(),
-        transactionContext,
-        mapper,
-        new PostgresDialectObjectStoreStatements());
+    SqlObjectStore objectStore =
+        new SqlObjectStore(
+            dataSourceRegistry,
+            config.getDataSourceName(),
+            transactionContext,
+            mapper,
+            new PostgresDialectObjectStoreStatements());
     return new ObjectStoreServiceSql(mapper, objectStore);
   }
 
@@ -160,14 +174,15 @@ public class ApiAdapterExtension implements ServiceExtension {
     final int poolSize = 1;
     final int initialDelay = 5;
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(poolSize);
-    scheduler.scheduleAtFixedRate(() -> messageBus.deliverMessages(config.getSqlMessageBusMaxDelivery()),
-        initialDelay, config.getSqlMessageBusDeliveryInterval(), TimeUnit.SECONDS);
+    scheduler.scheduleAtFixedRate(
+        () -> messageBus.deliverMessages(config.getSqlMessageBusMaxDelivery()),
+        initialDelay,
+        config.getSqlMessageBusDeliveryInterval(),
+        TimeUnit.SECONDS);
   }
 
   private void initHttpController(
-      MessageBus messageBus,
-      ResultService resultService,
-      ApiAdapterConfig config) {
+      MessageBus messageBus, ResultService resultService, ApiAdapterConfig config) {
     webService.registerResource(
         apiConfig.getContextAlias(),
         new HttpController(monitor, resultService, messageBus, config));
@@ -189,8 +204,7 @@ public class ApiAdapterExtension implements ServiceExtension {
   }
 
   private void initDataReferenceReceiver(
-      MessageBus messageBus,
-      DataRefNotificationSyncService dataRefSyncService) {
+      MessageBus messageBus, DataRefNotificationSyncService dataRefSyncService) {
     EndpointDataReferenceReceiver dataReferenceReceiver =
         new EndpointDataReferenceReceiverImpl(monitor, messageBus, dataRefSyncService);
     receiverRegistry.registerReceiver(dataReferenceReceiver);
@@ -219,17 +233,17 @@ public class ApiAdapterExtension implements ServiceExtension {
     final int interval = 5;
     ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(poolSize);
 
-    DataReferenceErrorHandler errorHandler = new DataReferenceErrorHandler(
-        monitor, messageBus,objectStore, transferProcessService);
+    DataReferenceErrorHandler errorHandler =
+        new DataReferenceErrorHandler(monitor, messageBus, objectStore, transferProcessService);
 
-    scheduler.scheduleAtFixedRate(errorHandler::validateActiveProcesses,
-        initialDelay, interval, TimeUnit.SECONDS);
+    scheduler.scheduleAtFixedRate(
+        errorHandler::validateActiveProcesses, initialDelay, interval, TimeUnit.SECONDS);
   }
 
   private boolean isPersistenceConfigured(ApiAdapterConfig config) {
-    return Objects.nonNull(config.getDataSourceName()) &&
-        Objects.nonNull(config.getDataSourceUrl()) &&
-        Objects.nonNull(config.getDataSourceUser()) &&
-        Objects.nonNull(config.getDataSourcePass());
+    return Objects.nonNull(config.getDataSourceName())
+        && Objects.nonNull(config.getDataSourceUrl())
+        && Objects.nonNull(config.getDataSourceUser())
+        && Objects.nonNull(config.getDataSourcePass());
   }
 }

@@ -28,14 +28,10 @@ public class ApiAdapterConfig {
   private static final String CATALOG_REQUEST_LIMIT =
       "edc.cp.adapter.catalog.request.limit";
 
-  private static final String DATASOURCE_NAME =
-      "edc.datasource.cpadapter.name";
-  private static final String DATASOURCE_URL =
-      "edc.datasource.cpadapter.url";
-  private static final String DATASOURCE_USER =
-      "edc.datasource.cpadapter.user";
-  private static final String DATASOURCE_PASS =
-      "edc.datasource.cpadapter.password";
+  private static final String DATASOURCE_NAME = "edc.datasource.cpadapter.name";
+  private static final String DATASOURCE_URL = "edc.datasource.cpadapter.url";
+  private static final String DATASOURCE_USER = "edc.datasource.cpadapter.user";
+  private static final String DATASOURCE_PASS = "edc.datasource.cpadapter.password";
 
   private static final String IN_MEMORY_MESSAGE_BUS_THREAD_NUMBER =
       "edc.cp.adapter.messagebus.inmemory.thread.number";
@@ -45,7 +41,6 @@ public class ApiAdapterConfig {
       "edc.cp.adapter.messagebus.sql.max.delivery";
   private static final String SQL_MESSAGE_BUS_DELIVERY_INTERVAL =
       "edc.cp.adapter.messagebus.sql.max.delivery";
-
 
   private final ServiceExtensionContext context;
 

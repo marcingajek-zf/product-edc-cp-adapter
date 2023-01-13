@@ -14,7 +14,14 @@
 
 package org.eclipse.tractusx.edc.cp.adapter.messaging;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.util.*;
 import org.eclipse.edc.spi.monitor.Monitor;
 import org.eclipse.edc.transaction.datasource.spi.DataSourceRegistry;
 import org.eclipse.edc.transaction.spi.TransactionContext;
@@ -28,14 +35,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.time.Clock;
-import java.time.Instant;
-import java.time.ZoneId;
-import java.util.*;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 public class SqlMessageBusTest {
   @Mock Monitor monitor;
@@ -54,7 +53,8 @@ public class SqlMessageBusTest {
     // given
     Message<ProcessData> message = new DataReferenceRetrievalDto(null, 3);
     when(listenerService.getListener(any())).thenReturn(listener);
-    SqlMessageBus messageBus = new SqlMessageBus(monitor, listenerService, inMemoryFakeStore(), 2, 10);
+    SqlMessageBus messageBus =
+        new SqlMessageBus(monitor, listenerService, inMemoryFakeStore(), 2, 10);
 
     // when
     messageBus.send(Channel.INITIAL, message);
@@ -72,7 +72,8 @@ public class SqlMessageBusTest {
     Message<ProcessData> message = new DataReferenceRetrievalDto(null, 3);
     when(listenerService.getListener(any())).thenReturn(listener);
     doThrow(new IllegalStateException()).doNothing().when(listener).process(any());
-    SqlMessageBus messageBus = new SqlMessageBus(monitor, listenerService, inMemoryFakeStore(), 2, 10);
+    SqlMessageBus messageBus =
+        new SqlMessageBus(monitor, listenerService, inMemoryFakeStore(), 2, 10);
 
     // when
     messageBus.send(Channel.INITIAL, message);
@@ -89,7 +90,8 @@ public class SqlMessageBusTest {
     message.setErrorNumber(10);
     when(listenerService.getListener(any())).thenReturn(listener);
     doThrow(new IllegalStateException()).doNothing().when(listener).process(any());
-    SqlMessageBus messageBus = new SqlMessageBus(monitor, listenerService, inMemoryFakeStore(), 2, 10);
+    SqlMessageBus messageBus =
+        new SqlMessageBus(monitor, listenerService, inMemoryFakeStore(), 2, 10);
 
     // when
     messageBus.send(Channel.INITIAL, message);
@@ -100,11 +102,17 @@ public class SqlMessageBusTest {
   }
 
   private SqlQueueStore inMemoryFakeStore() {
-    return new SqlQueueStore(dataSourceRegistry, "dsname",
-        getFakeTransactionContext(), new ObjectMapper(), getFakeStatements(),
-        "cid", getFakeClock()) {
+    return new SqlQueueStore(
+        dataSourceRegistry,
+        "dsname",
+        getFakeTransactionContext(),
+        new ObjectMapper(),
+        getFakeStatements(),
+        "cid",
+        getFakeClock()) {
 
       private final Map<String, QueueMessage> map = new HashMap<>();
+
       @Override
       public void saveMessage(QueueMessage queueMessage) {
         String id = UUID.randomUUID().toString();
@@ -212,9 +220,7 @@ public class SqlMessageBusTest {
   private TransactionContext getFakeTransactionContext() {
     return new TransactionContext() {
       @Override
-      public void execute(TransactionBlock transactionBlock) {
-
-      }
+      public void execute(TransactionBlock transactionBlock) {}
 
       @Override
       public <T> T execute(ResultTransactionBlock<T> resultTransactionBlock) {

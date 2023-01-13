@@ -15,6 +15,7 @@
 package org.eclipse.tractusx.edc.cp.adapter.process.datareference;
 
 import jakarta.ws.rs.core.Response;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import org.eclipse.edc.connector.spi.transferprocess.TransferProcessService;
 import org.eclipse.edc.spi.monitor.Monitor;
@@ -24,8 +25,6 @@ import org.eclipse.tractusx.edc.cp.adapter.messaging.Channel;
 import org.eclipse.tractusx.edc.cp.adapter.messaging.MessageBus;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectStoreService;
 import org.eclipse.tractusx.edc.cp.adapter.service.objectstore.ObjectType;
-
-import java.util.List;
 
 @AllArgsConstructor
 public class DataReferenceErrorHandler {

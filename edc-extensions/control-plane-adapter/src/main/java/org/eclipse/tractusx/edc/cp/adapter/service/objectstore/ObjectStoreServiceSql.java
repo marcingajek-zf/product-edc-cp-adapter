@@ -16,14 +16,13 @@ package org.eclipse.tractusx.edc.cp.adapter.service.objectstore;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.eclipse.edc.util.collection.CollectionUtil;
 import org.eclipse.tractusx.edc.cp.adapter.store.SqlObjectStore;
 import org.eclipse.tractusx.edc.cp.adapter.store.model.ObjectEntity;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @AllArgsConstructor
 public class ObjectStoreServiceSql implements ObjectStoreService {
@@ -32,11 +31,12 @@ public class ObjectStoreServiceSql implements ObjectStoreService {
 
   @Override
   public void put(String key, ObjectType objectType, Object object) {
-    ObjectEntity entity = ObjectEntity.builder()
-        .id(key)
-        .type(objectType.name())
-        .object(objectToJson(object, objectType.name()))
-        .build();
+    ObjectEntity entity =
+        ObjectEntity.builder()
+            .id(key)
+            .type(objectType.name())
+            .object(objectToJson(object, objectType.name()))
+            .build();
     objectStore.saveMessage(entity);
   }
 
@@ -55,9 +55,7 @@ public class ObjectStoreServiceSql implements ObjectStoreService {
     if (CollectionUtil.isEmpty(entities)) {
       return List.of();
     }
-    return entities.stream()
-        .map(entity -> jsonToObject(entity, type))
-        .collect(Collectors.toList());
+    return entities.stream().map(entity -> jsonToObject(entity, type)).collect(Collectors.toList());
   }
 
   @Override

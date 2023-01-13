@@ -63,7 +63,7 @@ public class ResultService implements Listener<DataReferenceRetrievalDto> {
     }
     try {
       results.get(id).add(processData);
-    } catch(IllegalStateException e) {
+    } catch (IllegalStateException e) {
       logIgnoredResult(id, processData);
     }
   }
@@ -73,14 +73,16 @@ public class ResultService implements Listener<DataReferenceRetrievalDto> {
   }
 
   private void logReceivedResult(DataReferenceRetrievalDto dto) {
-    monitor.info(String.format("[%s] Result received: %s",
-        dto.getTraceId(),
-        getResultInfo(dto.getPayload())));
+    monitor.info(
+        String.format(
+            "[%s] Result received: %s", dto.getTraceId(), getResultInfo(dto.getPayload())));
   }
 
   private void logIgnoredResult(String id, ProcessData processData) {
-    monitor.warning(String.format("[%s] Other Result was already returned! Result '%s' will be ignored!",
-        id, getResultInfo(processData)));
+    monitor.warning(
+        String.format(
+            "[%s] Other Result was already returned! Result '%s' will be ignored!",
+            id, getResultInfo(processData)));
   }
 
   private String getResultInfo(ProcessData processData) {

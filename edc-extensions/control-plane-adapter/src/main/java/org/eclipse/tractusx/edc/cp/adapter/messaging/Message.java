@@ -15,7 +15,6 @@
 package org.eclipse.tractusx.edc.cp.adapter.messaging;
 
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicInteger;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -61,8 +60,6 @@ public abstract class Message<T> {
   }
 
   private int getDelayTime() {
-    return errorNumber < 5
-        ? errorNumber * 750
-        : (int) Math.pow(errorNumber, 2) * 150;
+    return errorNumber < 5 ? errorNumber * 750 : (int) Math.pow(errorNumber, 2) * 150;
   }
 }
