@@ -8,14 +8,14 @@ Additional requirements, that affects the architecture of the extension:
 - scaling horizontally (when persistence is added to configuration)
 - can retry failed part of the process (no need to start the process from the beginning)
 
-<h2><u>Configuration:</u></h2>
+## Configuration:
 
 | Key                                              | Description                                                                                                                                                                                                                            | Mandatory | Default |
 |:-------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|------|---------|
 | edc.cp.adapter.default.message.retry.number      | Number of retries of a message, in case of an error, within the internal process of retrieving DataReference                                                                                                                           | no   | 3       |
 | edc.cp.adapter.default.sync.request.timeout      | Timeout for synchronous request (in seconds), after witch 'timeout' error will be returned to the requesting client                                                                                                                    | no   | 20      | 
 | edc.cp.adapter.messagebus.inmemory.thread.number | Number of threads running within the in-memory implementation of MessageBus                                                                                          _ _                                                               | no   | 10      |
-| edc.cp.adapter.reuse.contract.agreement          | Turn on/off reusing of existing contract agreements for the specific asset. Once the contract is agreed, the second request for the same asset will reuse the agreement (if exists) pulled from the EDC. Value 1 = on, 0 = off. | no   | 1       |
+| edc.cp.adapter.reuse.contract.agreement          | Turn on/off reusing of existing contract agreements for the specific asset. Once the contract is agreed, the second request for the same asset will reuse the agreement (if exists) pulled from the EDC.  | no   | true    |
 | edc.cp.adapter.cache.catalog.expire.after        | Number of seconds, after witch prevoiusly requested catalog will not be reused, and will be removed from catalog cache                                                                                                                 | no   | 300     |
 | edc.cp.adapter.catalog.request.limit             | Maximum number of items taken from Catalog within single request. Requests are repeated until all offers of the query are retrieved                                                             | no   | 100     |
 
@@ -33,7 +33,7 @@ To run CP-Adapter in "PERSISTENT" mode, You need to create a proper tables with 
 | edc.datasource.cpadapter.password | data source password |
 
 
-<h2><u>How to use it:</u></h2>
+## How to use it:
 1. Client sends a GET request with two parameters: assetId and the url of the provider control-plane:
 
    ```
@@ -84,7 +84,7 @@ To run CP-Adapter in "PERSISTENT" mode, You need to create a proper tables with 
    header:       Authorization:eyJhbGciOiJSUzI1NiJ9.eyJkYWQiOi...                                        {authKey:authCode}
    ```
 
-<b>Internal design of the extension:</b>
+### Internal design of the extension:
 
 ![diagram](src/main/resources/control-plane-adapter.jpg)
 

@@ -59,7 +59,7 @@ public class ApiAdapterConfig {
   }
 
   public boolean isContractAgreementReuseOn() {
-    return context.getSetting(REUSE_CONTRACT_AGREEMENT, 1) != 0;
+    return context.getSetting(REUSE_CONTRACT_AGREEMENT, true);
   }
 
   public int getCatalogExpireAfterTime() {
