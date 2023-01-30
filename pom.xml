@@ -54,7 +54,7 @@
         <!-- plugins -->
         <org.apache.maven.plugins.maven.dependency.plugin.version>3.5.0</org.apache.maven.plugins.maven.dependency.plugin.version>
         <org.apache.maven.plugins.maven.jar.plugin.version>3.3.0</org.apache.maven.plugins.maven.jar.plugin.version>
-        <com.diffplug.spotless.maven.plugin.version>2.29.0</com.diffplug.spotless.maven.plugin.version>
+        <com.diffplug.spotless.maven.plugin.version>2.30.0</com.diffplug.spotless.maven.plugin.version>
         <org.codehaus.mojo.exec.maven.plugin.version>3.1.0</org.codehaus.mojo.exec.maven.plugin.version>
         <org.apache.maven.plugins.javadoc.version>3.4.1</org.apache.maven.plugins.javadoc.version>
         <org.codehaus.mojo.license.maven.plugin>2.0.0</org.codehaus.mojo.license.maven.plugin>
@@ -72,7 +72,7 @@
         <org.eclipse.dash.license.tool.plugin.version>0.0.1-SNAPSHOT</org.eclipse.dash.license.tool.plugin.version>
 
         <!-- dependency version -->
-        <org.eclipse.edc.version>0.0.1-20230109-SNAPSHOT</org.eclipse.edc.version>
+        <org.eclipse.edc.version>0.0.1-20230115-SNAPSHOT</org.eclipse.edc.version>
         <com.azure.sdk.bom.version>1.2.8</com.azure.sdk.bom.version>
         <org.postgresql.version>42.5.1</org.postgresql.version>
         <org.flywaydb.version>9.11.0</org.flywaydb.version>
@@ -361,11 +361,6 @@
             <dependency>
                 <groupId>org.eclipse.tractusx.edc.extensions</groupId>
                 <artifactId>control-plane-adapter</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.eclipse.tractusx.edc.extensions</groupId>
-                <artifactId>custom-jsonld</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
@@ -1002,7 +997,7 @@
             </dependency>
             <dependency>
                 <groupId>org.eclipse.edc</groupId>
-                <artifactId>transfer-pull-http-receiver</artifactId>
+                <artifactId>transfer-pull-http-dynamic-receiver</artifactId>
                 <version>${org.eclipse.edc.version}</version>
             </dependency>
             <dependency>

@@ -21,6 +21,7 @@
 package org.eclipse.tractusx.edc.tests;
 
 import com.google.gson.Gson;
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -121,6 +122,31 @@ public class DataManagementAPI {
     transfer.dataDestination = mapDataAddress(dataAddress);
     transfer.protocol = "ids-multipart";
 
+    return initiateTransferProcess(transfer);
+  }
+
+  public Transfer initiateTransferProcess(
+      String receivingConnectorUrl,
+      String contractAgreementId,
+      String assetId,
+      DataAddress dataAddress,
+      String receiverEndpoint)
+      throws IOException {
+    final ManagementApiTransfer transfer = new ManagementApiTransfer();
+
+    transfer.connectorAddress = receivingConnectorUrl;
+    transfer.contractId = contractAgreementId;
+    transfer.assetId = assetId;
+    transfer.transferType = new ManagementApiTransferType();
+    transfer.managedResources = false;
+    transfer.dataDestination = mapDataAddress(dataAddress);
+    transfer.protocol = "ids-multipart";
+    transfer.properties = new ManagementApiProperties(receiverEndpoint);
+
+    return initiateTransferProcess(transfer);
+  }
+
+  private Transfer initiateTransferProcess(ManagementApiTransfer transfer) throws IOException {
     final ManagementApiTransferResponse response =
         post(TRANSFER_PATH, transfer, new TypeToken<ManagementApiTransferResponse>() {});
 
@@ -486,6 +512,7 @@ public class DataManagementAPI {
     private ManagementApiDataAddress dataDestination;
     private boolean managedResources;
     private ManagementApiTransferType transferType;
+    private ManagementApiProperties properties;
   }
 
   @Data
@@ -517,6 +544,12 @@ public class DataManagementAPI {
   private static class ManagementApiDataAddress {
     public static final String TYPE = "type";
     private Map<String, Object> properties;
+  }
+
+  @Data
+  private static class ManagementApiProperties {
+    @SerializedName(value = "receiver.http.endpoint")
+    private final String receiverHttpEndpoint;
   }
 
   @Data
