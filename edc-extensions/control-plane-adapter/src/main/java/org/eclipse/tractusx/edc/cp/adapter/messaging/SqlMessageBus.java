@@ -48,20 +48,20 @@ public class SqlMessageBus implements MessageBus {
   public void send(Channel channel, Message<?> message) {
     if (isNull(message)) {
       monitor.warning(String.format("Message is empty, channel: %s", channel));
-    } else {
-      monitor.info(
-          String.format("[%s] Message sent to channel: %s", message.getTraceId(), channel));
-      long now = Instant.now().toEpochMilli();
-      store.saveMessage(
-          QueueMessage.builder().channel(channel.name()).message(message).invokeAfter(now).build());
-
-      deliverMessages(maxDelivery);
+      return;
     }
+    monitor.info(
+        String.format("[%s] Message sent to channel: %s", message.getTraceId(), channel));
+    long now = Instant.now().toEpochMilli();
+    store.saveMessage(
+        QueueMessage.builder().channel(channel.name()).message(message).invokeAfter(now).build());
+
+    deliverMessages(maxDelivery);
   }
 
   public void deliverMessages(int maxElements) {
     List<QueueMessage> queueMessages = store.findMessagesToSend(maxElements);
-    monitor.debug("Found " + queueMessages.size() + " messages to send.");
+    monitor.debug(String.format("Found [%d] messages to send.", queueMessages.size()));
     queueMessages.forEach(
         queueMessage -> executorService.submit(() -> deliverMessage(queueMessage)));
   }
@@ -76,7 +76,7 @@ public class SqlMessageBus implements MessageBus {
     try {
       listenerService.getListener(channel).process(message);
       store.deleteMessage(queueMessage.getId());
-      monitor.debug("[%s] Message sent and removed." + queueMessage.getId());
+      monitor.debug(String.format("[%s] Message sent and removed.",queueMessage.getId()));
     } catch (Exception e) {
       monitor.warning(String.format("[%s] Message processing error.", message.getTraceId()), e);
       message.setErrorNumber(currentErrorNumber);

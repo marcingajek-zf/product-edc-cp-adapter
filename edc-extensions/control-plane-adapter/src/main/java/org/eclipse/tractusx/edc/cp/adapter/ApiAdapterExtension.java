@@ -155,7 +155,7 @@ public class ApiAdapterExtension implements ServiceExtension {
       ServiceExtensionContext context, ApiAdapterConfig config) {
     if (!isPersistenceConfigured(config)) {
       monitor.info(
-          "Persistent layer configuration is missing. Starting ObjectStore in 'IN MEMORY' mode.");
+          "Persistent layer configuration is missing. Starting Control Plane Adapter Extension in 'IN MEMORY' mode.");
       return new ObjectStoreServiceInMemory(context.getTypeManager().getMapper());
     }
 
@@ -242,8 +242,6 @@ public class ApiAdapterExtension implements ServiceExtension {
 
   private boolean isPersistenceConfigured(ApiAdapterConfig config) {
     return Objects.nonNull(config.getDataSourceName())
-        && Objects.nonNull(config.getDataSourceUrl())
-        && Objects.nonNull(config.getDataSourceUser())
-        && Objects.nonNull(config.getDataSourcePass());
+        && Objects.nonNull(config.getDataSourceUrl());
   }
 }
