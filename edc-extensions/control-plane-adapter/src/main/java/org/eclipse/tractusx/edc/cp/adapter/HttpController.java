@@ -47,7 +47,7 @@ public class HttpController {
       @PathParam("assetId") String assetId,
       @QueryParam("providerUrl") String providerUrl,
       @QueryParam("contractAgreementId") String contractAgreementId,
-      @QueryParam("contractAgreementReuse") String contractAgreementReuse,
+      @QueryParam("contractAgreementReuse") @DefaultValue("true") boolean contractAgreementReuse,
       @QueryParam("timeout") String timeout) {
 
     if (invalidParams(assetId, providerUrl)) {
@@ -93,7 +93,7 @@ public class HttpController {
       String assetId,
       String providerUrl,
       String contractAgreementId,
-      String contractAgreementReuse) {
+      boolean contractAgreementReuse) {
     ProcessData processData =
         ProcessData.builder()
             .assetId(assetId)
@@ -109,8 +109,8 @@ public class HttpController {
     return message.getTraceId();
   }
 
-  private boolean isContractAgreementReuseOn(String contractAgreementReuse) {
-    return !"0".equals(contractAgreementReuse) && config.isContractAgreementReuseOn();
+  private boolean isContractAgreementReuseOn(boolean contractAgreementReuse) {
+    return contractAgreementReuse && config.isContractAgreementReuseOn();
   }
 
   private Response notFoundResponse() {

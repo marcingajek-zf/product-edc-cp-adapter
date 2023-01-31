@@ -42,7 +42,7 @@ public class HttpControllerTest {
     HttpController httpController = new HttpController(monitor, resultService, messageBus, config);
 
     // when
-    Response response = httpController.getAssetSynchronous(null, "providerUrl", null, null, null);
+    Response response = httpController.getAssetSynchronous(null, "providerUrl", null, false, null);
 
     // then
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -59,7 +59,7 @@ public class HttpControllerTest {
     HttpController httpController = new HttpController(monitor, resultService, messageBus, config);
 
     // when
-    Response response = httpController.getAssetSynchronous("assetId", null, null, null, null);
+    Response response = httpController.getAssetSynchronous("assetId", null, null, false, null);
 
     // then
     assertEquals(Response.Status.BAD_REQUEST.getStatusCode(), response.getStatus());
@@ -84,7 +84,7 @@ public class HttpControllerTest {
 
     // when
     Response response =
-        httpController.getAssetSynchronous("assetId", "providerUrl", null, null, null);
+        httpController.getAssetSynchronous("assetId", "providerUrl", null, false, null);
 
     // then
     assertEquals(Response.Status.BAD_GATEWAY.getStatusCode(), response.getStatus());
@@ -105,7 +105,7 @@ public class HttpControllerTest {
 
     // when
     Response response =
-        httpController.getAssetSynchronous("assetId", "providerUrl", null, null, null);
+        httpController.getAssetSynchronous("assetId", "providerUrl", null, false, null);
 
     // then
     assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());

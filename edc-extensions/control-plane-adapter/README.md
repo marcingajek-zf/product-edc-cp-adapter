@@ -48,11 +48,11 @@ To run CP-Adapter in "PERSISTENT" mode, You need to create a proper tables with 
    
    Optional request parameters, that overwrite the settings for a single request:
 
-   | Name | Description                                                                                                                                                                                                             |
-   |--- |--- |
-   | contractAgreementId    | Defines the ID of existing contract agreement, that should be reused for retrieving the asset. If parameter is specified, but contract is not found, 404 error will be returned.                                        |
-   | contractAgreementReuse | Similar to <i>edc.cp.adapter.reuse.contract.agreement</i> option allows to turn off reusing of existing contracts, but on a request level. Set the parameter value to '0' and new contract agrement will be negotiated. |
-   | timeout                | Similar to <i>edc.cp.adapter.default.sync.request.timeout</i>, defines the maximum time of the request. If data is not ready, time out error will be returned.                                                          |
+   | Name | Description                                                                                                                                                                                                               |
+   |---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|--- |
+   | contractAgreementId    | Defines the ID of existing contract agreement, that should be reused for retrieving the asset. If parameter is specified, but contract is not found, 404 error will be returned.                                          |
+   | contractAgreementReuse | Similar to <i>edc.cp.adapter.reuse.contract.agreement</i> option allows to turn off reusing of existing contracts, but on a request level. Set the parameter value to 'false' and new contract agrement will be negotiated. |
+   | timeout                | Similar to <i>edc.cp.adapter.default.sync.request.timeout</i>, defines the maximum time of the request. If data is not ready, time out error will be returned.                                                            |
    
    The controller is registered under the context alias of DataManagement API. The authentication depends on the DataManagement configuration.
    To find out more please visit:
