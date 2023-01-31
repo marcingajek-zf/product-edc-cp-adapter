@@ -50,8 +50,7 @@ public class SqlMessageBus implements MessageBus {
       monitor.warning(String.format("Message is empty, channel: %s", channel));
       return;
     }
-    monitor.info(
-        String.format("[%s] Message sent to channel: %s", message.getTraceId(), channel));
+    monitor.info(String.format("[%s] Message sent to channel: %s", message.getTraceId(), channel));
     long now = Instant.now().toEpochMilli();
     store.saveMessage(
         QueueMessage.builder().channel(channel.name()).message(message).invokeAfter(now).build());
@@ -76,7 +75,7 @@ public class SqlMessageBus implements MessageBus {
     try {
       listenerService.getListener(channel).process(message);
       store.deleteMessage(queueMessage.getId());
-      monitor.debug(String.format("[%s] Message sent and removed.",queueMessage.getId()));
+      monitor.debug(String.format("[%s] Message sent and removed.", queueMessage.getId()));
     } catch (Exception e) {
       monitor.warning(String.format("[%s] Message processing error.", message.getTraceId()), e);
       message.setErrorNumber(currentErrorNumber);

@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.sql.lease.SqlLeaseContextBuilder;
 import org.eclipse.edc.sql.store.AbstractSqlStore;
@@ -135,10 +136,15 @@ public class SqlQueueStore extends AbstractSqlStore {
         () -> {
           try (var connection = getConnection()) {
             var sql = statements.getMessagesToSendTemplate();
-            return executeQuery(connection, false, this::mapQueueMessage, sql, now, max)
-                .map(queueMessage -> getLeasedQueueMessage(connection, queueMessage))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+            Stream<QueueMessage> stream =
+                executeQuery(connection, false, this::mapQueueMessage, sql, now, max);
+            List<QueueMessage> result =
+                stream
+                    .map(queueMessage -> getLeasedQueueMessage(connection, queueMessage))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toList());
+            stream.close();
+            return result;
           } catch (SQLException e) {
             e.printStackTrace();
             throw new EdcPersistenceException(e);

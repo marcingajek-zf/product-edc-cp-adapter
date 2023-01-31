@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import org.eclipse.edc.spi.persistence.EdcPersistenceException;
 import org.eclipse.edc.sql.store.AbstractSqlStore;
 import org.eclipse.edc.transaction.datasource.spi.DataSourceRegistry;
@@ -81,8 +82,11 @@ public class SqlObjectStore extends AbstractSqlStore {
         () -> {
           try (var connection = getConnection()) {
             var sql = statements.getFindByTypeTemplate();
-            return executeQuery(connection, false, this::mapObjectEntity, sql, type)
-                .collect(Collectors.toList());
+            Stream<ObjectEntity> stream =
+                executeQuery(connection, false, this::mapObjectEntity, sql, type);
+            List<ObjectEntity> result = stream.collect(Collectors.toList());
+            stream.close();
+            return result;
           } catch (SQLException e) {
             e.printStackTrace();
             throw new EdcPersistenceException(e);
